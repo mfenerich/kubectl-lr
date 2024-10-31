@@ -1,7 +1,3 @@
-Here's a README file for your project:
-
----
-
 # Kubernetes LimitRange CLI Plugin
 
 A `kubectl` plugin for creating `LimitRange` resources with specified CPU and memory limits in Kubernetes namespaces.
@@ -92,7 +88,3 @@ Feel free to contribute by submitting issues or pull requests. Any help to enhan
 ## TODO
 
 - Implement a comprehensive test suite to improve code reliability and maintainability.
-
----
-
-Save this content as `README.md` in your project directory.
