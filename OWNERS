@@ -1,0 +1,8 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+  - mfenerich
+reviewers:
+  - mfenerich
+labels:
+  - sig/cli

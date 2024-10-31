@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# kubectl_complete-lr
+# A script to enable tab completion for the `kubectl lr` plugin.
+
+# Check if we are completing a flag.
+args=("$@")
+lastArg=${args[((${#args[@]}-1))]}
+
+if [[ "$lastArg" == -* ]]; then
+    # If the last argument is a flag (starts with `-` and doesn't contain `=`),
+    # delegate to Cobra's built-in completion system.
+    if [[ "$lastArg" != *=* ]]; then
+        kubectl lr __complete "$@"
+        exit 0
+    fi
+fi
+
+# Basic completion logic for non-flag arguments.
+# This part can be expanded to handle custom logic for completing the value of arguments.
+# Turn off file completion by using ShellCompDirective.
+# ShellCompDirective documentation: https://github.com/spf13/cobra/blob/main/shell_completions.md#completion-of-nouns
+echo :4
+exit 0
