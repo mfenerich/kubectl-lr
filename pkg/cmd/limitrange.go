@@ -142,51 +142,11 @@ func (o *LimitOptions) Validate() error {
 
 // Run executes the creation of the LimitRange or prints the YAML/JSON
 func (o *LimitOptions) Run() error {
-    limitRange := &v1.LimitRange{
-        TypeMeta: metav1.TypeMeta{
-            APIVersion: "v1",
-            Kind:       "LimitRange",
-        },
-        ObjectMeta: metav1.ObjectMeta{
-            Name:      o.name,
-            Namespace: o.namespace,
-        },
-        Spec: v1.LimitRangeSpec{
-            Limits: []v1.LimitRangeItem{
-                {
-                    Type: v1.LimitTypeContainer,
-                    Max: v1.ResourceList{},
-                    Min: v1.ResourceList{},
-                    Default: v1.ResourceList{},
-                    DefaultRequest: v1.ResourceList{},
-                },
-            },
-        },
-    }
-
-    // Populate resource lists if provided
-    if o.maxCPU != "" {
-        limitRange.Spec.Limits[0].Max[v1.ResourceCPU] = resource.MustParse(o.maxCPU)
-    }
-    if o.minCPU != "" {
-        limitRange.Spec.Limits[0].Min[v1.ResourceCPU] = resource.MustParse(o.minCPU)
-    }
-    if o.defaultCPU != "" {
-        limitRange.Spec.Limits[0].Default[v1.ResourceCPU] = resource.MustParse(o.defaultCPU)
-    }
-    if o.defaultRequestCPU != "" {
-        limitRange.Spec.Limits[0].DefaultRequest[v1.ResourceCPU] = resource.MustParse(o.defaultRequestCPU)
-    }
-    if o.maxMemory != "" {
-        limitRange.Spec.Limits[0].Max[v1.ResourceMemory] = resource.MustParse(o.maxMemory)
-    }
-    if o.minMemory != "" {
-        limitRange.Spec.Limits[0].Min[v1.ResourceMemory] = resource.MustParse(o.minMemory)
-    }
+    limitRange := o.createLimitRangeObject()
 
     // Handle client-side dry-run
     if o.dryRun == "client" {
-        return o.printOutput(limitRange)
+        return o.printOutputWithTypeMeta(limitRange)
     } else if o.dryRun != "" && o.dryRun != "server" {
         return fmt.Errorf("invalid value for --dry-run: %s, must be 'client' or 'server'", o.dryRun)
     }
@@ -215,7 +175,7 @@ func (o *LimitOptions) Run() error {
 
     // Print server response for server-side dry-run
     if o.dryRun == "server" {
-        return o.printOutput(createdLimitRange)
+        return o.printOutputWithTypeMeta(createdLimitRange)
     }
 
     // Print success message
@@ -223,8 +183,63 @@ func (o *LimitOptions) Run() error {
     return nil
 }
 
-// printOutput prints the LimitRange in the specified output format (yaml/json)
-func (o *LimitOptions) printOutput(limitRange *v1.LimitRange) error {
+// createLimitRangeObject creates a new LimitRange object populated with provided options
+func (o *LimitOptions) createLimitRangeObject() *v1.LimitRange {
+    limitRange := &v1.LimitRange{
+        TypeMeta: metav1.TypeMeta{
+            APIVersion: "v1",
+            Kind:       "LimitRange",
+        },
+        ObjectMeta: metav1.ObjectMeta{
+            Name:      o.name,
+            Namespace: o.namespace,
+        },
+        Spec: v1.LimitRangeSpec{
+            Limits: []v1.LimitRangeItem{
+                {
+                    Type: v1.LimitTypeContainer,
+                    Max: v1.ResourceList{},
+                    Min: v1.ResourceList{},
+                    Default: v1.ResourceList{},
+                    DefaultRequest: v1.ResourceList{},
+                },
+            },
+        },
+    }
+
+    // Populate resource values if they are provided
+    if o.maxCPU != "" {
+        limitRange.Spec.Limits[0].Max[v1.ResourceCPU] = resource.MustParse(o.maxCPU)
+    }
+    if o.minCPU != "" {
+        limitRange.Spec.Limits[0].Min[v1.ResourceCPU] = resource.MustParse(o.minCPU)
+    }
+    if o.defaultCPU != "" {
+        limitRange.Spec.Limits[0].Default[v1.ResourceCPU] = resource.MustParse(o.defaultCPU)
+    }
+    if o.defaultRequestCPU != "" {
+        limitRange.Spec.Limits[0].DefaultRequest[v1.ResourceCPU] = resource.MustParse(o.defaultRequestCPU)
+    }
+    if o.maxMemory != "" {
+        limitRange.Spec.Limits[0].Max[v1.ResourceMemory] = resource.MustParse(o.maxMemory)
+    }
+    if o.minMemory != "" {
+        limitRange.Spec.Limits[0].Min[v1.ResourceMemory] = resource.MustParse(o.minMemory)
+    }
+
+    return limitRange
+}
+
+// printOutputWithTypeMeta ensures TypeMeta is set and prints the LimitRange in the specified format
+func (o *LimitOptions) printOutputWithTypeMeta(limitRange *v1.LimitRange) error {
+    // Ensure TypeMeta is set
+    if limitRange.TypeMeta.APIVersion == "" || limitRange.TypeMeta.Kind == "" {
+        limitRange.TypeMeta = metav1.TypeMeta{
+            APIVersion: "v1",
+            Kind:       "LimitRange",
+        }
+    }
+
     var output []byte
     var err error
 
