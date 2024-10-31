@@ -26,7 +26,7 @@ var (
     `
 )
 
-// LimitOptions provides information required to create a LimitRange
+// LimitOptions holds information required to create a LimitRange
 type LimitOptions struct {
     configFlags        *genericclioptions.ConfigFlags
     namespace          string
@@ -42,7 +42,7 @@ type LimitOptions struct {
     IOStreams          genericclioptions.IOStreams
 }
 
-// NewLimitOptions provides an instance of LimitOptions with default values
+// NewLimitOptions initializes an instance of LimitOptions with default values
 func NewLimitOptions(streams genericclioptions.IOStreams) *LimitOptions {
     return &LimitOptions{
         configFlags: genericclioptions.NewConfigFlags(true),
@@ -50,7 +50,7 @@ func NewLimitOptions(streams genericclioptions.IOStreams) *LimitOptions {
     }
 }
 
-// NewCmdLimit provides a cobra command wrapping LimitOptions
+// NewCmdLimit creates a cobra command wrapping LimitOptions
 func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
     o := NewLimitOptions(streams)
 
@@ -59,23 +59,23 @@ func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
         Short:        "Create a LimitRange resource",
         Example:      limitExample,
         SilenceUsage: true,
-        Args:         cobra.ExactArgs(1), // Enforce exactly one argument (the name)
+        Args:         cobra.ExactArgs(1),
         RunE: func(c *cobra.Command, args []string) error {
-            o.name = args[0] // Set the name from the argument
+            o.name = args[0]
             if err := o.Complete(c, args); err != nil {
-                return err
+                return fmt.Errorf("completion error: %w", err)
             }
             if err := o.Validate(); err != nil {
-                return err
+                return fmt.Errorf("validation error: %w", err)
             }
             if err := o.Run(); err != nil {
-                return err
+                return fmt.Errorf("execution error: %w", err)
             }
             return nil
         },
     }
 
-    // Add flags from configFlags, which include common flags like --namespace
+    // Add common flags
     o.configFlags.AddFlags(cmd.Flags())
 
     // Add shorthand -n for the --namespace flag
@@ -83,7 +83,7 @@ func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
         nsFlag.Shorthand = "n"
     }
 
-    // Add custom flags for the command
+    // Define custom flags for LimitRange options
     cmd.Flags().StringVar(&o.maxCPU, "max-cpu", "", "Maximum CPU limit for containers")
     cmd.Flags().StringVar(&o.minCPU, "min-cpu", "", "Minimum CPU limit for containers")
     cmd.Flags().StringVar(&o.defaultCPU, "default-cpu", "", "Default CPU limit for containers")
@@ -96,19 +96,19 @@ func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
     return cmd
 }
 
-// Complete sets all information required for creating a LimitRange
+// Complete sets all required information for creating a LimitRange
 func (o *LimitOptions) Complete(cmd *cobra.Command, args []string) error {
     if o.namespace == "" {
         var err error
         o.namespace, _, err = o.configFlags.ToRawKubeConfigLoader().Namespace()
         if err != nil {
-            return fmt.Errorf("failed to get current namespace: %v", err)
+            return fmt.Errorf("failed to get current namespace: %w", err)
         }
     }
     return nil
 }
 
-// Validate ensures that all required arguments and flag values are provided
+// Validate checks that all required arguments and flag values are provided
 func (o *LimitOptions) Validate() error {
     if o.namespace == "" {
         return fmt.Errorf("namespace cannot be empty")
@@ -120,7 +120,7 @@ func (o *LimitOptions) Validate() error {
         return fmt.Errorf("at least one resource limit or request must be specified")
     }
 
-    // Validate that resource limits are in a proper format
+    // Validate resource limit format
     resourceFields := map[string]string{
         "max-cpu":            o.maxCPU,
         "min-cpu":            o.minCPU,
@@ -140,7 +140,7 @@ func (o *LimitOptions) Validate() error {
     return nil
 }
 
-// Run creates a LimitRange in the specified namespace or prints its YAML/JSON representation
+// Run executes the creation of the LimitRange or prints the YAML/JSON
 func (o *LimitOptions) Run() error {
     limitRange := &v1.LimitRange{
         TypeMeta: metav1.TypeMeta{
@@ -164,7 +164,7 @@ func (o *LimitOptions) Run() error {
         },
     }
 
-    // Add resource values if they are provided
+    // Populate resource lists if provided
     if o.maxCPU != "" {
         limitRange.Spec.Limits[0].Max[v1.ResourceCPU] = resource.MustParse(o.maxCPU)
     }
@@ -184,31 +184,14 @@ func (o *LimitOptions) Run() error {
         limitRange.Spec.Limits[0].Min[v1.ResourceMemory] = resource.MustParse(o.minMemory)
     }
 
-    // Handle dry-run options for client and server
+    // Handle client-side dry-run
     if o.dryRun == "client" {
-        var output []byte
-        var err error
-        if o.output == "yaml" {
-            output, err = yaml.Marshal(limitRange)
-        } else if o.output == "json" {
-            serializer := json.NewSerializerWithOptions(json.DefaultMetaFactory, nil, nil, json.SerializerOptions{Pretty: true})
-            output, err = runtime.Encode(serializer, limitRange)
-        } else {
-            return fmt.Errorf("unsupported output format: %s", o.output)
-        }
-
-        if err != nil {
-            return fmt.Errorf("failed to format output: %v", err)
-        }
-
-        // Print the output and return without creating the resource
-        fmt.Fprintf(o.IOStreams.Out, "%s\n", output)
-        return nil
+        return o.printOutput(limitRange)
     } else if o.dryRun != "" && o.dryRun != "server" {
         return fmt.Errorf("invalid value for --dry-run: %s, must be 'client' or 'server'", o.dryRun)
     }
 
-    // Set CreateOptions for server-side dry-run if specified
+    // Set CreateOptions for server-side dry-run
     createOptions := metav1.CreateOptions{}
     if o.dryRun == "server" {
         createOptions.DryRun = []string{"All"}
@@ -216,41 +199,48 @@ func (o *LimitOptions) Run() error {
 
     config, err := o.configFlags.ToRawKubeConfigLoader().ClientConfig()
     if err != nil {
-        return err
+        return fmt.Errorf("failed to get Kubernetes client config: %w", err)
     }
 
     clientset, err := kubernetes.NewForConfig(config)
     if err != nil {
-        return err
+        return fmt.Errorf("failed to create Kubernetes clientset: %w", err)
     }
 
     // Execute the create operation with the given options
     createdLimitRange, err := clientset.CoreV1().LimitRanges(o.namespace).Create(context.TODO(), limitRange, createOptions)
     if err != nil {
-        return err
+        return fmt.Errorf("failed to create LimitRange: %w", err)
     }
 
+    // Print server response for server-side dry-run
     if o.dryRun == "server" {
-        // Output the server response in the desired format
-        var output []byte
-        if o.output == "yaml" {
-            output, err = yaml.Marshal(createdLimitRange)
-        } else if o.output == "json" {
-            serializer := json.NewSerializerWithOptions(json.DefaultMetaFactory, nil, nil, json.SerializerOptions{Pretty: true})
-            output, err = runtime.Encode(serializer, createdLimitRange)
-        } else {
-            return fmt.Errorf("unsupported output format: %s", o.output)
-        }
-
-        if err != nil {
-            return fmt.Errorf("failed to format output: %v", err)
-        }
-
-        fmt.Fprintf(o.IOStreams.Out, "Server-side dry run output:\n%s\n", output)
-        return nil
+        return o.printOutput(createdLimitRange)
     }
 
-    // Print the success message only when not using dry-run
+    // Print success message
     fmt.Fprintf(o.IOStreams.Out, "LimitRange %q created successfully in namespace %q\n", limitRange.Name, o.namespace)
+    return nil
+}
+
+// printOutput prints the LimitRange in the specified output format (yaml/json)
+func (o *LimitOptions) printOutput(limitRange *v1.LimitRange) error {
+    var output []byte
+    var err error
+
+    if o.output == "yaml" {
+        output, err = yaml.Marshal(limitRange)
+    } else if o.output == "json" {
+        serializer := json.NewSerializerWithOptions(json.DefaultMetaFactory, nil, nil, json.SerializerOptions{Pretty: true})
+        output, err = runtime.Encode(serializer, limitRange)
+    } else {
+        return fmt.Errorf("unsupported output format: %s", o.output)
+    }
+
+    if err != nil {
+        return fmt.Errorf("failed to format output: %w", err)
+    }
+
+    fmt.Fprintf(o.IOStreams.Out, "%s\n", output)
     return nil
 }
