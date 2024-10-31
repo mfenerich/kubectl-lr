@@ -20,8 +20,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericiooptions"
@@ -31,11 +29,11 @@ import (
 // main initializes and executes the kubectl-lr plugin.
 func main() {
     // Check if the executable is running as a kubectl plugin
-    if strings.HasPrefix(filepath.Base(os.Args[0]), "kubectl-") {
+/*     if strings.HasPrefix(filepath.Base(os.Args[0]), "kubectl-") {
         fmt.Println("Running as a kubectl plugin.")
     } else {
         fmt.Println("Running as a standalone command.")
-    }
+    } */
 
     // Initialize the flag set
     flags := pflag.NewFlagSet("kubectl-lr", pflag.ExitOnError)
