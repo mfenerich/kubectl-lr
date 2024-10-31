@@ -1,101 +1,98 @@
-# sample-cli-plugin
+Here's a README file for your project:
 
-This repository implements a single kubectl plugin for switching the namespace
-that the current KUBECONFIG context points to. In order to remain as indestructive
-as possible, no existing contexts are modified.
+---
 
-**Note:** go-get or vendor this package as `k8s.io/sample-cli-plugin`.
+# Kubernetes LimitRange CLI Plugin
 
-This particular example demonstrates how to perform basic operations such as:
+A `kubectl` plugin for creating `LimitRange` resources with specified CPU and memory limits in Kubernetes namespaces.
 
-* How to create a new custom command that follows kubectl patterns
-* How to obtain a user's KUBECONFIG settings and modify them
-* How to make general use of the provided "cli-runtime" set of helpers for kubectl and third-party plugins
+## Overview
 
-It makes use of the genericclioptions in [k8s.io/cli-runtime](https://github.com/kubernetes/cli-runtime)
-to generate a set of configuration flags which are in turn used to generate a raw representation of
-the user's KUBECONFIG, as well as to obtain configuration which can be used with RESTClients when sending
-requests to a kubernetes api server.
+This plugin provides a command-line interface for easily creating `LimitRange` resources in your Kubernetes cluster. It supports both client-side and server-side dry runs and outputs in YAML or JSON formats for previewing the resource before creation.
 
-## Details
+## Features
 
-The sample cli plugin uses the [client-go library](https://github.com/kubernetes/client-go/tree/master/tools/clientcmd) to patch an existing KUBECONFIG file in a user's environment in order to update context information to point the client to a new or existing namespace.
+- Create `LimitRange` resources with configurable CPU and memory limits.
+- Supports dry-run modes (`client` and `server`) to preview the resource without applying it.
+- Outputs resource definitions in YAML or JSON format.
+- Easy to use with intuitive command flags.
 
-In order to be as non-destructive as possible, no existing contexts are modified in any way. Rather, the current context is examined, and matched against existing contexts to find a context containing the same "AuthInfo" and "Cluster" information, but with the newly desired namespace requested by the user.
+## Installation
 
-## Purpose
+Ensure you have Go installed and `kubectl` configured on your system. Clone this repository and run:
 
-This is an example of how to build a kubectl plugin using the same set of tools and helpers available to kubectl.
-
-## Running
-
-```sh
-# assumes you have a working KUBECONFIG
-$ go build cmd/kubectl-ns.go
-# place the built binary somewhere in your PATH
-$ cp ./kubectl-ns /usr/local/bin
-
-# you can now begin using this plugin as a regular kubectl command:
-# update your configuration to point to "new-namespace"
-$ kubectl ns new-namespace
-# any kubectl commands you perform from now on will use "new-namespace"
-$ kubectl get pod
-NAME                READY     STATUS    RESTARTS   AGE
-new-namespace-pod   1/1       Running   0          1h
-
-# list all of the namespace in use by contexts in your KUBECONFIG
-$ kubectl ns --list
-
-# show the namespace that the currently set context in your KUBECONFIG points to
-$ kubectl ns
+```bash
+go build -o kubectl-lr .
 ```
 
-## Use Cases
+Move the binary to a directory in your `PATH`:
 
-This plugin can be used as a developer tool, in order to quickly view or change the current namespace
-that kubectl points to.
-
-It can also be used as a means of showcasing usage of the cli-runtime set of utilities to aid in
-third-party plugin development.
-
-## Shell completion
-
-This plugin supports shell completion when used through kubectl.  To enable shell completion for the plugin
-you must copy the file `./kubectl_complete-ns` somewhere on `$PATH` and give it executable permissions.
-
-The `./kubectl_complete-ns` script shows a hybrid approach to providing completions:
-1. it uses the builtin `__complete` command provided by [Cobra](https://github.com/spf13/cobra) for flags
-1. it calls `kubectl` to obtain the list of namespaces to complete arguments (note that a more elegant approach would be to have the `kubectl-ns` program itself provide completion of arguments by implementing Cobra's `ValidArgsFunction` to fetch the list of namespaces, but it would then be a less varied example)
-
-One can then do things like:
-```
-$ kubectl ns <TAB>
-default          kube-node-lease  kube-public      kube-system
-
-$ kubectl ns --<TAB>
---as                        -- Username to impersonate for the operation. User could be a regular user or a service account in a namespace.
---as-group                  -- Group to impersonate for the operation, this flag can be repeated to specify multiple groups.
---as-uid                    -- UID to impersonate for the operation.
---cache-dir                 -- Default cache directory
-[...]
+```bash
+mv kubectl-lr /usr/local/bin/
 ```
 
-Note: kubectl v1.26 or higher is required for shell completion to work for plugins.
-## Cleanup
+### Usage
 
-You can "uninstall" this plugin from kubectl by simply removing it from your PATH:
+#### Basic Example
 
-    $ rm /usr/local/bin/kubectl-ns
+```bash
+kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
+```
 
-## Compatibility
+#### Client-Side Dry Run
 
-HEAD of this repository will match HEAD of k8s.io/apimachinery and
-k8s.io/client-go.
+```bash
+kubectl lr my-limitrange --namespace=my-namespace --max-cpu="2" --dry-run=client -o yaml
+```
 
-## Where does it come from?
+#### Server-Side Dry Run
 
-`sample-cli-plugin` is synced from
-https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/sample-cli-plugin.
-Code changes are made in that location, merged into k8s.io/kubernetes and
-later synced here.
+```bash
+kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server -o json
+```
 
+### Command Flags
+
+- `--max-cpu`: Maximum CPU limit for containers.
+- `--min-cpu`: Minimum CPU limit for containers.
+- `--default-cpu`: Default CPU limit for containers.
+- `--default-request-cpu`: Default CPU request for containers.
+- `--max-memory`: Maximum memory limit for containers.
+- `--min-memory`: Minimum memory limit for containers.
+- `-n, --namespace`: Namespace for the `LimitRange` resource (shorthand for `--namespace`).
+- `--dry-run`: Dry-run mode (`client` or `server`).
+- `-o, --output`: Output format (`yaml` or `json`).
+
+### Example Commands
+
+- Create a `LimitRange` with CPU and memory limits:
+  ```bash
+  kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
+  ```
+
+- Client-side dry-run:
+  ```bash
+  kubectl lr my-limitrange --namespace=my-namespace --max-cpu="2" --min-cpu=500m --dry-run=client -o yaml
+  ```
+
+- Server-side dry-run:
+  ```bash
+  kubectl lr my-limitrange --namespace=my-namespace --default-cpu=500m --default-request-cpu=200m --dry-run=server -o json
+  ```
+
+## Requirements
+
+- Go 1.16 or later.
+- `kubectl` configured on your system.
+
+## Contributing
+
+Feel free to contribute by submitting issues or pull requests. Any help to enhance the functionality or add new features is welcome!
+
+## TODO
+
+- Implement a comprehensive test suite to improve code reliability and maintainability.
+
+---
+
+Save this content as `README.md` in your project directory.
