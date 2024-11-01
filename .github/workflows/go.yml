@@ -8,11 +8,12 @@ on:
     branches:
       - main
 
+env:
+  GO_VERSION: ${{ vars.GO_VERSION }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-        GO_VERSION: ${{ vars.GO_VERSION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,8 +31,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    env:
-        GO_VERSION: ${{ vars.GO_VERSION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,8 +50,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    env:
-        GO_VERSION: ${{ vars.GO_VERSION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
