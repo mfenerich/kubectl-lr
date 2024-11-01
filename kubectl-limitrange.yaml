@@ -1,7 +1,7 @@
 apiVersion: krew.googlecontainertools.github.com/v1alpha2
 kind: Plugin
 metadata:
-  name: limitrange
+  name: lr
 spec:
   version: v1.0.0
   homepage: https://github.com/mfenerich/kubectl-lr
@@ -14,9 +14,10 @@ spec:
   - selector:
       matchLabels:
         os: darwin
-        arch: amd64
+        arch: arm64
     uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.0/kubectl-lr-darwin-amd64.tar.gz
     sha256: 3e7c47e758674ccba81c15eb14dbfb2fa7613fa1f2395ca72dbd09c450019f53
+    bin: kubectl-lr
   - selector:
       matchLabels:
         os: linux
@@ -30,5 +31,5 @@ spec:
         os: windows
         arch: amd64
     uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.0/kubectl-lr-windows-amd64.zip
-    sha256: 80BB1D457F67834348FDC2B98254ECF6186F537A929E087C62D6C306DABE5665
+    sha256: 80bb1d457f67834348fdc2b98254ecf6186f537a929e087c62d6c306dabe5665
     bin: kubectl-lr.exe
