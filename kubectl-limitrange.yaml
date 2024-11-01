@@ -3,8 +3,8 @@ kind: Plugin
 metadata:
   name: limitrange
 spec:
-  version: "v1.0.0"
-  homepage: https://github.com/seu-usuario/kubectl-limitrange
+  version: v1.0.0
+  homepage: https://github.com/mfenerich/kubectl-lr
   shortDescription: "Creates LimitRange resources in Kubernetes"
   description: |
     kubectl-limitrange is a kubectl plugin that allows easy creation of
@@ -12,44 +12,23 @@ spec:
     CPU and memory limits.
   platforms:
   - selector:
-      matchExpressions:
-      - key: "os"
-        operator: "In"
-        values:
-        - darwin
-    uri: https://github.com/seu-usuario/kubectl-limitrange/releases/download/v1.0.0/kubectl-limitrange-darwin.tar.gz
-    sha256: abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
-    files:
-    - from: "kubectl-limitrange"
-      to: "."
-    - from: "LICENSE"
-      to: "."
+      matchLabels:
+        os: darwin
+        arch: amd64
+    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.0/kubectl-lr-darwin-amd64.tar.gz
+    sha256: 3e7c47e758674ccba81c15eb14dbfb2fa7613fa1f2395ca72dbd09c450019f53
+  - selector:
+      matchLabels:
+        os: linux
+        arch: amd64
+    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.0/kubectl-lr-linux-amd64.tar.gz
+    sha256: 26460079cd751dcafd08c6d009853deffa40d653a0f4086981a48f0bf8d941eb
     bin: kubectl-lr
   - selector:
       matchExpressions:
-      - key: "os"
-        operator: "In"
-        values:
-        - linux
-    uri: https://github.com/seu-usuario/kubectl-limitrange/releases/download/v1.0.0/kubectl-limitrange-linux.tar.gz
-    sha256: abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
-    files:
-    - from: "kubectl-limitrange"
-      to: "."
-    - from: "LICENSE"
-      to: "."
-    bin: kubectl-lr
-  - selector:
-      matchExpressions:
-      - key: "os"
-        operator: "In"
-        values:
-        - windows
-    uri: https://github.com/seu-usuario/kubectl-limitrange/releases/download/v1.0.0/kubectl-limitrange-windows.zip
-    sha256: abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
-    files:
-    - from: "kubectl-limitrange.exe"
-      to: "."
-    - from: "LICENSE"
-      to: "."
+      matchLabels:
+        os: windows
+        arch: amd64
+    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.0/kubectl-lr-windows-amd64.zip
+    sha256: 80BB1D457F67834348FDC2B98254ECF6186F537A929E087C62D6C306DABE5665
     bin: kubectl-lr.exe
