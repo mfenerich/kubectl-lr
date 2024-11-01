@@ -49,9 +49,6 @@ jobs:
             tar -czvf kubectl-lr-${{ matrix.os }}.tar.gz kubectl-lr${{ matrix.ext }}
           fi
 
-      - name: List files for debugging
-        run: ls -l
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -78,7 +75,10 @@ jobs:
       - name: Create and Upload Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/kubectl-lr-ubuntu-latest.tar.gz, artifacts/kubectl-lr-macos-latest.tar.gz, artifacts/kubectl-lr-windows-latest.zip
+          files: |
+            artifacts/kubectl-lr-ubuntu-latest/kubectl-lr-ubuntu-latest.tar.gz
+            artifacts/kubectl-lr-macos-latest/kubectl-lr-macos-latest.tar.gz
+            artifacts/kubectl-lr-windows-latest/kubectl-lr-windows-latest.zip
           tag_name: "v1.0.0"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body: |
