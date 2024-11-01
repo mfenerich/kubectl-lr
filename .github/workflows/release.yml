@@ -1,0 +1,101 @@
+name: Build and Create Multi-Platform Releases
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  GO_VERSION: ${{ vars.GO_VERSION }}
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            ext: ''
+          - os: macos-latest
+            ext: ''
+          - os: windows-latest
+            ext: '.exe'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Build binary
+        run: go build -o kubectl-lr${{ matrix.ext }} ./cmd/kubectl-lr
+
+      - name: Create archive for release
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            zip kubectl-lr-${{ matrix.os }}.zip kubectl-lr${{ matrix.ext }}
+          else
+            tar -czvf kubectl-lr-${{ matrix.os }}.tar.gz kubectl-lr${{ matrix.ext }}
+          fi
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kubectl-lr-${{ matrix.os }}
+          path: |
+            kubectl-lr-${{ matrix.os }}.tar.gz
+            kubectl-lr-${{ matrix.os }}.zip
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v1.0.0"
+          name: Release ${{ github.ref_name }}
+          body: |
+            Multi-platform binaries for Linux, macOS, and Windows.
+          draft: true # Use draft mode for review before publishing
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux binary to Release
+        if: always()
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./kubectl-lr-ubuntu-latest.tar.gz
+          asset_name: kubectl-lr-linux.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS binary to Release
+        if: always()
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./kubectl-lr-macos-latest.tar.gz
+          asset_name: kubectl-lr-mac.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Windows binary to Release
+        if: always()
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./kubectl-lr-windows-latest.zip
+          asset_name: kubectl-lr-windows.zip
+          asset_content_type: application/zip
