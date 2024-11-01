@@ -67,42 +67,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create Release
-        id: create_release
+      - name: Create and Upload Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }})
+          files: |
+            kubectl-lr-ubuntu-latest.tar.gz
+            kubectl-lr-macos-latest.tar.gz
+            kubectl-lr-windows-latest.zip
+          tag_name: "v1.0.0"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body: |
             Multi-platform binaries for Linux, macOS, and Windows.
-          draft: true
+          draft: true  # Change to false to automatically publish the release
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Upload Linux binary to Release
-        if: always()
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./kubectl-lr-ubuntu-latest.tar.gz
-          asset_name: kubectl-lr-linux.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload macOS binary to Release
-        if: always()
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./kubectl-lr-macos-latest.tar.gz
-          asset_name: kubectl-lr-mac.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Windows binary to Release
-        if: always()
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./kubectl-lr-windows-latest.zip
-          asset_name: kubectl-lr-windows.zip
-          asset_content_type: application/zip
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
