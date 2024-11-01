@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+
 env:
   GO_VERSION: ${{ vars.GO_VERSION }}
 
@@ -60,6 +61,9 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Run go fmt
+        run: go fmt ./...
+
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
@@ -91,8 +95,16 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Run tests
-        run: go test ./... -v
+      - name: Run tests with coverage
+        run: go test ./... -v -coverprofile=coverage.txt
 
-      - name: Check code formatting
-        run: go fmt ./...
+      - name: Display test coverage
+        run: go tool cover -func=coverage.txt
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' # Upload it just once
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.txt
+          flags: unittests
+          token: ${{ secrets.CODECOV_TOKEN }}
