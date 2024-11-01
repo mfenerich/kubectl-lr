@@ -8,6 +8,9 @@ on:
 env:
   GO_VERSION: ${{ vars.GO_VERSION }}
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -72,10 +75,9 @@ jobs:
           draft: true  # Change to false to automatically publish the release
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Upload Linux binary to Release
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -84,7 +86,6 @@ jobs:
           asset_content_type: application/gzip
 
       - name: Upload macOS binary to Release
-        if: matrix.os == 'macos-latest'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -93,7 +94,6 @@ jobs:
           asset_content_type: application/gzip
 
       - name: Upload Windows binary to Release
-        if: matrix.os == 'windows-latest'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
