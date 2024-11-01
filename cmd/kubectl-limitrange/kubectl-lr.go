@@ -28,27 +28,27 @@ import (
 
 // main initializes and executes the kubectl-lr plugin.
 func main() {
-    // Check if the executable is running as a kubectl plugin
-/*     if strings.HasPrefix(filepath.Base(os.Args[0]), "kubectl-") {
-        fmt.Println("Running as a kubectl plugin.")
-    } else {
-        fmt.Println("Running as a standalone command.")
-    } */
+	// Check if the executable is running as a kubectl plugin
+	/*     if strings.HasPrefix(filepath.Base(os.Args[0]), "kubectl-") {
+	           fmt.Println("Running as a kubectl plugin.")
+	       } else {
+	           fmt.Println("Running as a standalone command.")
+	       } */
 
-    // Initialize the flag set
-    flags := pflag.NewFlagSet("kubectl-lr", pflag.ExitOnError)
-    pflag.CommandLine = flags
+	// Initialize the flag set
+	flags := pflag.NewFlagSet("kubectl-lr", pflag.ExitOnError)
+	pflag.CommandLine = flags
 
-    // Create the root command for the plugin
-    root := cmd.NewCmdLimit(genericiooptions.IOStreams{
-        In:     os.Stdin,
-        Out:    os.Stdout,
-        ErrOut: os.Stderr,
-    })
+	// Create the root command for the plugin
+	root := cmd.NewCmdLimit(genericiooptions.IOStreams{
+		In:     os.Stdin,
+		Out:    os.Stdout,
+		ErrOut: os.Stderr,
+	})
 
-    // Execute the root command and handle any errors gracefully
-    if err := root.Execute(); err != nil {
-        fmt.Fprintf(os.Stderr, "Error executing kubectl-lr: %v\n", err)
-        os.Exit(1)
-    }
+	// Execute the root command and handle any errors gracefully
+	if err := root.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error executing kubectl-lr: %v\n", err)
+		os.Exit(1)
+	}
 }
