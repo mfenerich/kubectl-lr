@@ -13,6 +13,7 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/genericiooptions"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/yaml"
 )
 
@@ -40,6 +41,9 @@ type LimitOptions struct {
     dryRun             string // Accepts "client" or "server"
     output             string
     IOStreams          genericclioptions.IOStreams
+
+    // Function to create Kubernetes clientset, can be overridden in tests
+    clientsetFunc func(config *rest.Config) (kubernetes.Interface, error)
 }
 
 // NewLimitOptions initializes an instance of LimitOptions with default values
@@ -47,6 +51,9 @@ func NewLimitOptions(streams genericclioptions.IOStreams) *LimitOptions {
     return &LimitOptions{
         configFlags: genericclioptions.NewConfigFlags(true),
         IOStreams:   streams,
+        clientsetFunc: func(config *rest.Config) (kubernetes.Interface, error) {
+            return kubernetes.NewForConfig(config)
+        },
     }
 }
 
@@ -120,20 +127,27 @@ func (o *LimitOptions) Validate() error {
         return fmt.Errorf("at least one resource limit or request must be specified")
     }
 
-    // Validate resource limit format
+    // Validate resource limit format and check for negative values
     resourceFields := map[string]string{
-        "max-cpu":            o.maxCPU,
-        "min-cpu":            o.minCPU,
-        "default-cpu":        o.defaultCPU,
+        "max-cpu":             o.maxCPU,
+        "min-cpu":             o.minCPU,
+        "default-cpu":         o.defaultCPU,
         "default-request-cpu": o.defaultRequestCPU,
-        "max-memory":         o.maxMemory,
-        "min-memory":         o.minMemory,
+        "max-memory":          o.maxMemory,
+        "min-memory":          o.minMemory,
     }
 
     for fieldName, value := range resourceFields {
         if value != "" {
-            if _, err := resource.ParseQuantity(value); err != nil {
+            quantity, err := resource.ParseQuantity(value)
+            if quantity.IsZero() {
+                return fmt.Errorf("invalid %s value: must be greater than zero", fieldName)
+            }            
+            if err != nil {
                 return fmt.Errorf("invalid %s value: %s", fieldName, err)
+            }
+            if quantity.Sign() == -1 {
+                return fmt.Errorf("invalid %s value: must not be negative", fieldName)
             }
         }
     }
@@ -162,7 +176,7 @@ func (o *LimitOptions) Run() error {
         return fmt.Errorf("failed to get Kubernetes client config: %w", err)
     }
 
-    clientset, err := kubernetes.NewForConfig(config)
+    clientset, err := o.clientsetFunc(config)
     if err != nil {
         return fmt.Errorf("failed to create Kubernetes clientset: %w", err)
     }
@@ -175,6 +189,10 @@ func (o *LimitOptions) Run() error {
 
     // Print server response for server-side dry-run
     if o.dryRun == "server" {
+        if createdLimitRange == nil {
+            // Use the original limitRange if createdLimitRange is nil
+            createdLimitRange = limitRange
+        }
         return o.printOutputWithTypeMeta(createdLimitRange)
     }
 
