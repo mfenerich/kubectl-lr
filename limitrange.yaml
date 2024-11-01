@@ -16,14 +16,14 @@ spec:
         os: darwin
         arch: arm64
     uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.2/kubectl-limitrange-darwin-amd64.tar.gz
-    sha256: 475dab528aceb42f3c4df01ad8c709107c5ee5086d099ae2d36e8b9427955b1c
+    sha256: d01f4e27579e57cc6c66448983a695c788039c900927b7ec9d27fbc1d799cf3d
     bin: kubectl-limitrange
   - selector:
       matchLabels:
         os: linux
         arch: amd64
     uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.2/kubectl-limitrange-linux-amd64.tar.gz
-    sha256: dd325842baf9a6326269df9239ed09a9d34bf07f90192bc99dafc527e4bf239f
+    sha256: 614d16cc2ca4d4becd7247da9d40c70114759384d9a10b3820dc8d80b1d2e0db
     bin: kubectl-limitrange
   - selector:
       matchExpressions:
@@ -31,5 +31,5 @@ spec:
         os: windows
         arch: amd64
     uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.2/kubectl-limitrange-windows-amd64.zip
-    sha256: e1a19e377df54c875252ee86f56b40d0200e9e42d63015453fa20fe53e0a69de
-    bin: kubectl-limitranges.exe
+    sha256: 0fe51745b27bbe12f81d716a027d6d42d41a0670feb5d5747e741dc0df153968
+    bin: kubectl-limitrange.exe
