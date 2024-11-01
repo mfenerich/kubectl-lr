@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  GO_VERSION: ${{ vars.GO_VERSION }}
+  GO_VERSION: '1.23.x'
 
 permissions:
   contents: write
@@ -72,11 +72,14 @@ jobs:
       - name: List artifacts for debugging
         run: ls -l artifacts
 
+      - name: List all files
+        run: find artifacts -type f
+
       - name: Create and Upload Release
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*
-          tag_name: "v1.0.0"
+          tag_name: "v1.0.0"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body: |
             Multi-platform binaries for Linux, macOS, and Windows.
