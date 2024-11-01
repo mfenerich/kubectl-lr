@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  GO_VERSION: '1.21.x'
+  GO_VERSION: ${{ vars.GO_VERSION }}
 
 permissions:
   contents: write
