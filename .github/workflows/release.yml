@@ -54,12 +54,19 @@ jobs:
 
       - name: Generate SHA256 checksum
         run: |
-          if [[ "${{ matrix.os }}" == "windows-amd64" ]]; then
-            pwsh -Command "Get-FileHash -Algorithm SHA256 kubectl-lr-${{ matrix.os }}.zip | Select-Object -ExpandProperty Hash > kubectl-lr-${{ matrix.os }}.sha256"
-          else
-            ${{ matrix.checksum_cmd }} kubectl-lr-${{ matrix.os }}.tar.gz > kubectl-lr-${{ matrix.os }}.sha256
-          fi
-        shell: bash
+            if [[ "${{ matrix.os }}" == "windows-amd64" ]]; then
+              pwsh -Command "Get-FileHash -Algorithm SHA256 kubectl-lr-${{ matrix.os }}.zip | Select-Object -ExpandProperty Hash > kubectl-lr-${{ matrix.os }}.sha256"
+            else
+              sha256sum kubectl-lr-${{ matrix.os }}.tar.gz > kubectl-lr-${{ matrix.os }}.sha256
+            fi
+          shell: bash
+        
+      - name: List files after checksum generation
+        run: ls -l
+        
+      - name: Display checksum file contents
+        run: cat kubectl-lr-*.sha256
+        
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
