@@ -68,40 +68,6 @@ jobs:
       - name: Run tests
         run: go test ./pkg/cmd/... -v
 
-  coverage:
-    runs-on: ubuntu-latest
-    env:
-        GO_VERSION: ${{ vars.GO_VERSION }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: $GO_VERSION
-
-      - name: Install dependencies
-        run: go mod download
-
-      - name: Run tests with coverage
-        run: go test ./pkg/cmd/... -v -coverprofile=coverage.out
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage.out
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.out
-          flags: unittests
-          name: Go coverage report
-          fail_ci_if_error: true
-
   security:
     runs-on: ubuntu-latest
     env:
