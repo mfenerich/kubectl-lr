@@ -10,10 +10,10 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
-	k8s.io/api v0.31.2
-	k8s.io/apimachinery v0.31.2
-	k8s.io/cli-runtime v0.0.0-20241018050520-660de57a83fd
-	k8s.io/client-go v0.31.2
+	k8s.io/api v0.32.0-alpha.3
+	k8s.io/apimachinery v0.32.0-alpha.3
+	k8s.io/cli-runtime v0.32.0-alpha.3
+	k8s.io/client-go v0.32.0-alpha.3
 	sigs.k8s.io/yaml v1.4.0
 )
 
@@ -37,7 +37,6 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
-	github.com/imdario/mergo v0.3.6 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
