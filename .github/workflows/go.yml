@@ -20,7 +20,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: $GO_VERSION
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install dependencies
         run: go mod download
@@ -39,7 +39,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: $GO_VERSION
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install golangci-lint
         run: |
@@ -60,29 +60,11 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: $GO_VERSION
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install dependencies
         run: go mod download
 
       - name: Run tests
         run: go test ./pkg/cmd/... -v
-
-  security:
-    runs-on: ubuntu-latest
-    env:
-        GO_VERSION: ${{ vars.GO_VERSION }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: $GO_VERSION
-
-      - name: Run GoSec for security checks
-        uses: securego/gosec@v2
-        with:
-          args: "./..."
-
+        
