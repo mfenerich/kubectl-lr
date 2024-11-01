@@ -14,65 +14,53 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    concurrency:
-      group: build-${{ github.ref }}
-      cancel-in-progress: true
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
 
-      - name: Install dependencies
-        run: go mod download
+      - run: go mod download
 
-      - name: Build
-        run: go build ./cmd/kubectl-limitrange
+      - run: go build ./cmd/kubectl-limitrange
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: kubectl-limitrange
+          path: ./kubectl-limitrange
 
   lint:
     runs-on: ubuntu-latest
-    concurrency:
-      group: lint-${{ github.ref }}
-      cancel-in-progress: true
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
 
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
-          golangci-lint --version
+      - run: go mod download
 
-      - name: Run golangci-lint
-        run: golangci-lint run --timeout 5m
-
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          args: --timeout=30m
+          version: v1.61
+          
   test:
     runs-on: ubuntu-latest
-    concurrency:
-      group: test-${{ github.ref }}
-      cancel-in-progress: true
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: true
+          cache: true 
 
-      - name: Install dependencies
-        run: go mod download
+      - run: go mod download
 
-      - name: Run tests
-        run: go test ./pkg/cmd/... -v
+      - run: go test ./... -v
+
+      - name: Check code formatting
+        run: go fmt ./...
