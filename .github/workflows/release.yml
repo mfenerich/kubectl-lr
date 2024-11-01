@@ -118,7 +118,7 @@ jobs:
             artifacts/*/kubectl-limitrange-*-amd64.zip
             artifacts/*/kubectl-limitrange-*-amd64.tar.gz.sha256
             artifacts/*/kubectl-limitrange-*-amd64.zip.sha256
-          tag_name: "v1.0.1"  # Replace with appropriate tag logic if needed
+          tag_name: "v1.0.2"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body_path: release_body.md
           draft: true  # Change to false to automatically publish the release
