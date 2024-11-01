@@ -16,6 +16,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            ext: ''
+          - os: macos-latest
+            ext: ''
+          - os: windows-latest
+            ext: '.exe'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,13 +37,13 @@ jobs:
         run: go mod download
 
       - name: Build
-        run: go build ./cmd/kubectl-limitrange
+        run: go build -o kubectl-limitrange${{ matrix.ext }} ./cmd/kubectl-limitrange
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: kubectl-limitrange-${{ matrix.os }}
-          path: ./kubectl-limitrange
+          path: ./kubectl-limitrange${{ matrix.ext }}
 
   lint:
     runs-on: ubuntu-latest
@@ -64,6 +71,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            ext: ''
+          - os: macos-latest
+            ext: ''
+          - os: windows-latest
+            ext: '.exe'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
