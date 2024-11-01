@@ -155,7 +155,6 @@ func TestValidateResourceQuantities(t *testing.T) {
             expectError:   true,
             errorContains: "name is required",
         },
-        // Add additional test cases as needed
     }
 
     for _, tc := range testCases {

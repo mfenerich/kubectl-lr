@@ -18,13 +18,19 @@ This plugin provides a command-line interface for easily creating `LimitRange` r
 Ensure you have Go installed and `kubectl` configured on your system. Clone this repository and run:
 
 ```bash
-go build -o kubectl-lr .
+go build cmd/kubectl-limitrange/kubectl-lr.go
 ```
 
 Move the binary to a directory in your `PATH`:
 
 ```bash
 mv kubectl-lr /usr/local/bin/
+```
+
+## Run tests
+
+```bash
+go test ./pkg/cmd/... -v
 ```
 
 ### Usage
@@ -84,7 +90,3 @@ kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server
 ## Contributing
 
 Feel free to contribute by submitting issues or pull requests. Any help to enhance the functionality or add new features is welcome!
-
-## TODO
-
-- Implement a comprehensive test suite to improve code reliability and maintainability.
