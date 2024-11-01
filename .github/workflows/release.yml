@@ -64,17 +64,19 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-release
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./artifacts
+
+      - name: List artifacts for debugging
+        run: ls -l artifacts
 
       - name: Create and Upload Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            kubectl-lr-ubuntu-latest.tar.gz
-            kubectl-lr-macos-latest.tar.gz
-            kubectl-lr-windows-latest.zip
-          tag_name: "v1.0.0"  # Replace with appropriate tag logic if needed
+          files: artifacts/**/*
+          tag_name: "v1.0.0"
           name: Release ${{ github.ref_name }}
           body: |
             Multi-platform binaries for Linux, macOS, and Windows.
