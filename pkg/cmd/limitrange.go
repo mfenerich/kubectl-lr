@@ -47,6 +47,7 @@ type LimitOptions struct {
 }
 
 // NewLimitOptions initializes an instance of LimitOptions with default values
+//
 //go:noinline
 func NewLimitOptions(streams genericclioptions.IOStreams) *LimitOptions {
 	return &LimitOptions{
@@ -82,7 +83,7 @@ func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
 			return nil
 		},
 	}
-	
+
 	// coverage:ignore-start
 	// Add common flags
 	o.configFlags.AddFlags(cmd.Flags())

@@ -57,7 +57,7 @@ Please ensure your code passes all tests and linting checks before submission.
 ### Setting Up Your Environment
 
 Ensure that you have the following:
-- Go version ${{ vars.GO_VERSION }} or later.
+- Go version 1.23 or later.
 - `kubectl` configured on your system.
 
 ### Running Tests
