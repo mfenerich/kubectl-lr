@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  GO_VERSION: ${{ vars.GO_VERSION }}
+  GO_VERSION:  ${{ vars.GO_VERSION }}
 
 permissions:
   contents: write
@@ -17,17 +17,17 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [linux, macos, windows]
+        os: [linux-amd64, macos-amd64, windows-amd64]
         include:
-          - os: linux
+          - os: linux-amd64
             ext: ''
-            archive_ext: 'tar.gz'
-          - os: macos
+            checksum_cmd: sha256sum
+          - os: macos-amd64
             ext: ''
-            archive_ext: 'tar.gz'
-          - os: windows
+            checksum_cmd: shasum -a 256
+          - os: windows-amd64
             ext: '.exe'
-            archive_ext: 'zip'
+            checksum_cmd: CertUtil -hashfile
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,19 +46,28 @@ jobs:
 
       - name: Create archive for release
         run: |
-          if [[ "${{ matrix.os }}" == "windows" ]]; then
-            zip kubectl-lr-${{ matrix.os }}-amd64.zip kubectl-lr${{ matrix.ext }}
+          if [[ "${{ matrix.os }}" == "windows-amd64" ]]; then
+            zip kubectl-lr-${{ matrix.os }}.zip kubectl-lr${{ matrix.ext }}
           else
-            tar -czvf kubectl-lr-${{ matrix.os }}-amd64.tar.gz kubectl-lr${{ matrix.ext }}
+            tar -czvf kubectl-lr-${{ matrix.os }}.tar.gz kubectl-lr${{ matrix.ext }}
           fi
 
-      - name: Upload Artifact
+      - name: Generate SHA256 checksum
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-amd64" ]]; then
+            ${{ matrix.checksum_cmd }} kubectl-lr-${{ matrix.os }}.zip > kubectl-lr-${{ matrix.os }}.sha256
+          else
+            ${{ matrix.checksum_cmd }} kubectl-lr-${{ matrix.os }}.tar.gz > kubectl-lr-${{ matrix.os }}.sha256
+          fi
+
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kubectl-lr-${{ matrix.os }}-amd64
+          name: kubectl-lr-${{ matrix.os }}
           path: |
-            kubectl-lr-${{ matrix.os }}-amd64.tar.gz
-            kubectl-lr-${{ matrix.os }}-amd64.zip
+            kubectl-lr-${{ matrix.os }}.tar.gz
+            kubectl-lr-${{ matrix.os }}.zip
+            kubectl-lr-${{ matrix.os }}.sha256
 
   create-release:
     runs-on: ubuntu-latest
@@ -66,26 +75,30 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
-        with:
-          path: artifacts
 
-      - name: List artifacts for debugging
-        run: ls -l artifacts
-
-      - name: List all files
-        run: find artifacts -type f
+      - name: Display checksums for debugging
+        run: cat kubectl-lr-*.sha256
 
       - name: Create and Upload Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/kubectl-lr-linux-amd64/kubectl-lr-linux-amd64.tar.gz
-            artifacts/kubectl-lr-macos-amd64/kubectl-lr-macos-amd64.tar.gz
-            artifacts/kubectl-lr-windows-amd64/kubectl-lr-windows-amd64.zip
+            kubectl-lr-linux-amd64.tar.gz
+            kubectl-lr-linux-amd64.sha256
+            kubectl-lr-macos-amd64.tar.gz
+            kubectl-lr-macos-amd64.sha256
+            kubectl-lr-windows-amd64.zip
+            kubectl-lr-windows-amd64.sha256
           tag_name: "v1.0.0"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body: |
             Multi-platform binaries for Linux, macOS, and Windows.
+            SHA256 Checksums:
+            ```
+            $(cat kubectl-lr-linux-amd64.sha256)
+            $(cat kubectl-lr-macos-amd64.sha256)
+            $(cat kubectl-lr-windows-amd64.sha256)
+            ```
           draft: true  # Change to false to automatically publish the release
           prerelease: false
         env:
