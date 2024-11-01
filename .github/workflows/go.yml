@@ -11,6 +11,10 @@ on:
 env:
   GO_VERSION: ${{ vars.GO_VERSION }}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
