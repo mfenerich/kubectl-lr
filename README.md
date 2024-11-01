@@ -1,5 +1,7 @@
 [![codecov](https://codecov.io/github/mfenerich/kubectl-lr/graph/badge.svg?token=A02R6FB3CV)](https://codecov.io/github/mfenerich/kubectl-lr)
 
+[![Go CI/CD Pipeline](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml/badge.svg)](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml)
+
 # Kubernetes LimitRange CLI Plugin
 
 A `kubectl` plugin for creating `LimitRange` resources with specified CPU and memory limits in Kubernetes namespaces.
