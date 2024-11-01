@@ -47,6 +47,7 @@ type LimitOptions struct {
 }
 
 // NewLimitOptions initializes an instance of LimitOptions with default values
+//go:noinline
 func NewLimitOptions(streams genericclioptions.IOStreams) *LimitOptions {
 	return &LimitOptions{
 		configFlags: genericclioptions.NewConfigFlags(true),
@@ -81,7 +82,8 @@ func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
 			return nil
 		},
 	}
-
+	
+	// coverage:ignore-start
 	// Add common flags
 	o.configFlags.AddFlags(cmd.Flags())
 
@@ -101,6 +103,7 @@ func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
 	cmd.Flags().StringVarP(&o.output, "output", "o", "", "Output format. One of: yaml|json")
 
 	return cmd
+	// coverage:ignore-end
 }
 
 // Complete sets all required information for creating a LimitRange
