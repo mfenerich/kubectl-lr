@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  GO_VERSION: ${{ vars.GO_VERSION }}
+  GO_VERSION: '1.21.x'
 
 permissions:
   contents: write
@@ -23,17 +23,14 @@ jobs:
             goos: linux
             ext: ''
             archive_ext: 'tar.gz'
-            checksum_cmd: 'sha256sum'
           - os: macos-latest
             goos: darwin
             ext: ''
             archive_ext: 'tar.gz'
-            checksum_cmd: 'shasum -a 256'
           - os: windows-latest
             goos: windows
             ext: '.exe'
             archive_ext: 'zip'
-            checksum_cmd: 'CertUtil -hashfile'  # Windows command for checksums
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,36 +47,36 @@ jobs:
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
+          GOARCH: amd64
         run: go build -o kubectl-lr${{ matrix.ext }} ./cmd/kubectl-limitrange
 
-      - name: Create archive for release
+      - name: Create archive for release (Windows)
+        if: runner.os == 'Windows'
         run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            zip kubectl-lr-${{ matrix.goos }}-amd64.zip kubectl-lr${{ matrix.ext }}
-          else
-            tar -czvf kubectl-lr-${{ matrix.goos }}-amd64.tar.gz kubectl-lr${{ matrix.ext }}
-          fi
+          Compress-Archive -Path kubectl-lr${{ matrix.ext }} -DestinationPath kubectl-lr-${{ matrix.goos }}-amd64.zip
 
-      - name: Generate checksum
-        shell: bash
+      - name: Create archive for release (Unix)
+        if: runner.os != 'Windows'
         run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            powershell -Command "Get-FileHash kubectl-lr-${{ matrix.goos }}-amd64.zip -Algorithm SHA256 | Format-List" > kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256
-          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            shasum -a 256 kubectl-lr-${{ matrix.goos }}-amd64.tar.gz > kubectl-lr-${{ matrix.goos }}-amd64.tar.gz.sha256
-          else
-            sha256sum kubectl-lr-${{ matrix.goos }}-amd64.tar.gz > kubectl-lr-${{ matrix.goos }}-amd64.tar.gz.sha256
-          fi
+          tar -czvf kubectl-lr-${{ matrix.goos }}-amd64.tar.gz kubectl-lr${{ matrix.ext }}
+
+      - name: Generate checksum (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Get-FileHash -Algorithm SHA256 -Path kubectl-lr-${{ matrix.goos }}-amd64.zip | Format-List | Out-String | Select-String -Pattern "SHA256" | ForEach-Object { $_.Trim() } > kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256
+
+      - name: Generate checksum (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          shasum -a 256 kubectl-lr-${{ matrix.goos }}-amd64.tar.gz > kubectl-lr-${{ matrix.goos }}-amd64.tar.gz.sha256
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: kubectl-lr-${{ matrix.goos }}-amd64
           path: |
-            kubectl-lr-${{ matrix.goos }}-amd64.tar.gz
-            kubectl-lr-${{ matrix.goos }}-amd64.zip
-            kubectl-lr-${{ matrix.goos }}-amd64.tar.gz.sha256
-            kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256
+            kubectl-lr-${{ matrix.goos }}-amd64.*
+            kubectl-lr-${{ matrix.goos }}-amd64.*.sha256
 
   create-release:
     runs-on: ubuntu-latest
@@ -108,10 +105,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*
-          tag_name: "v1.0.0"
+          tag_name: "v1.0.0"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body_path: release_body.md
-          draft: true 
+          draft: true  # Change to false to automatically publish the release
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
