@@ -50,10 +50,13 @@ jobs:
           GOARCH: amd64
         run: go build -o kubectl-lr${{ matrix.ext }} ./cmd/kubectl-limitrange
 
+      # Removed the Copy LICENSE file step
+
       - name: Create archive for release (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          Compress-Archive -Path "kubectl-lr${{ matrix.ext }},LICENSE" -DestinationPath kubectl-lr-${{ matrix.goos }}-amd64.zip
+          Compress-Archive -Path "kubectl-lr${{ matrix.ext }}", "LICENSE" -DestinationPath "kubectl-lr-${{ matrix.goos }}-amd64.zip"
 
       - name: Create archive for release (Unix)
         if: runner.os != 'Windows'
@@ -64,9 +67,9 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Get-FileHash -Algorithm SHA256 -Path kubectl-lr-${{ matrix.goos }}-amd64.zip |
+          Get-FileHash -Algorithm SHA256 -Path "kubectl-lr-${{ matrix.goos }}-amd64.zip" |
           ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), $_.Path } |
-          Out-File -Encoding ascii -FilePath kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256
+          Out-File -Encoding ascii -FilePath "kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256"
 
       - name: Generate checksum (Unix)
         if: runner.os != 'Windows'
