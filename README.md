@@ -20,13 +20,13 @@ This plugin provides a command-line interface for easily creating `LimitRange` r
 Ensure you have Go installed and `kubectl` configured on your system. Clone this repository and run:
 
 ```bash
-go build cmd/kubectl-limitrange/kubectl-lr.go
+go build cmd/kubectl-lr/kubectl-limitrange.go
 ```
 
 Move the binary to a directory in your `PATH`:
 
 ```bash
-mv kubectl-lr /usr/local/bin/
+mv kubectl-limitrange /usr/local/bin/
 ```
 
 ## Run tests
