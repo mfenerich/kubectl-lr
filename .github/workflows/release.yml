@@ -94,6 +94,9 @@ jobs:
         with:
           path: ./artifacts
 
+      - name: DEGUB FILES
+        run: ls -l
+
       - name: Generate release notes with checksums
         run: |
           echo "## Checksums" > release_body.md
