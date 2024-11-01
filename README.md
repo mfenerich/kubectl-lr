@@ -84,7 +84,7 @@ kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server
 
 ## Requirements
 
-- Go 1.16 or later.
+- Go 1.23 or later.
 - `kubectl` configured on your system.
 
 ## Contributing
