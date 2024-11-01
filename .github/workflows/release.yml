@@ -61,13 +61,8 @@ jobs:
               sha256sum kubectl-lr-${{ matrix.os }}.tar.gz > kubectl-lr-${{ matrix.os }}.sha256
             fi
         
-        
       - name: List files after checksum generation
         run: ls -l
-        
-      - name: Display checksum file contents
-        run: cat kubectl-lr-*.sha256
-        
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
