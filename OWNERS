@@ -4,5 +4,3 @@ approvers:
   - mfenerich
 reviewers:
   - mfenerich
-labels:
-  - sig/cli
