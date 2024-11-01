@@ -62,8 +62,12 @@ jobs:
 
       - name: Generate checksum (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          Get-FileHash -Algorithm SHA256 -Path kubectl-lr-${{ matrix.goos }}-amd64.zip | Format-List | Out-String | Select-String -Pattern "SHA256" | ForEach-Object { $_.Trim() } > kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256
+            Get-FileHash -Algorithm SHA256 -Path kubectl-lr-${{ matrix.goos }}-amd64.zip |
+            ForEach-Object { "{0}  {1}" -f $_.Hash, $_.Path } |
+            Out-File -Encoding ascii -FilePath kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256
+        
 
       - name: Generate checksum (Unix)
         if: runner.os != 'Windows'
