@@ -62,52 +62,113 @@ func TestComplete(t *testing.T) {
     assert.Equal(t, "test-namespace", options.namespace)
 }
 
-func TestValidate(t *testing.T) {
-    // Initialize with at least one resource limit
-    options := &LimitOptions{
-        namespace: "default",
-        name:      "test-limitrange",
-        maxCPU:    "1", // Added resource limit
+func TestValidateResourceQuantities(t *testing.T) {
+    testCases := []struct {
+        name          string
+        options       *LimitOptions
+        expectError   bool
+        errorContains string
+    }{
+        {
+            name: "Valid maxCPU",
+            options: &LimitOptions{
+                namespace: "default",
+                name:      "test-limitrange",
+                maxCPU:    "1",
+            },
+            expectError: false,
+        },
+        {
+            name: "Zero maxCPU",
+            options: &LimitOptions{
+                namespace: "default",
+                name:      "test-limitrange",
+                maxCPU:    "0",
+            },
+            expectError:   true,
+            errorContains: "invalid max-cpu value: must be greater than zero",
+        },
+        {
+            name: "Negative maxCPU",
+            options: &LimitOptions{
+                namespace: "default",
+                name:      "test-limitrange",
+                maxCPU:    "-1",
+            },
+            expectError:   true,
+            errorContains: "invalid max-cpu value: must be greater than zero",
+        },
+        {
+            name: "Zero minMemory",
+            options: &LimitOptions{
+                namespace: "default",
+                name:      "test-limitrange",
+                minMemory: "0",
+            },
+            expectError:   true,
+            errorContains: "invalid min-memory value: must be greater than zero",
+        },
+        {
+            name: "Negative minMemory",
+            options: &LimitOptions{
+                namespace: "default",
+                name:      "test-limitrange",
+                minMemory: "-128Mi",
+            },
+            expectError:   true,
+            errorContains: "invalid min-memory value: must be greater than zero",
+        },
+        {
+            name: "Valid minCPU and maxMemory",
+            options: &LimitOptions{
+                namespace: "default",
+                name:      "test-limitrange",
+                minCPU:    "100m",
+                maxMemory: "512Mi",
+            },
+            expectError: false,
+        },
+        {
+            name: "No resource limits specified",
+            options: &LimitOptions{
+                namespace: "default",
+                name:      "test-limitrange",
+            },
+            expectError:   true,
+            errorContains: "at least one resource limit or request must be specified",
+        },
+        {
+            name: "Empty namespace",
+            options: &LimitOptions{
+                name:   "test-limitrange",
+                maxCPU: "1",
+            },
+            expectError:   true,
+            errorContains: "namespace cannot be empty",
+        },
+        {
+            name: "Empty name",
+            options: &LimitOptions{
+                namespace: "default",
+                maxCPU:    "1",
+            },
+            expectError:   true,
+            errorContains: "name is required",
+        },
+        // Add additional test cases as needed
     }
 
-    // Should pass validation
-    err := options.Validate()
-    assert.NoError(t, err, "expected no error for valid input")
-
-    // Test for empty namespace
-    options.namespace = ""
-    err = options.Validate()
-    assert.Error(t, err, "expected error when namespace is empty")
-    options.namespace = "default" // Reset namespace
-
-    // Test for missing name
-    options.name = ""
-    err = options.Validate()
-    assert.Error(t, err, "expected error when name is missing")
-}
-
-func TestValidateInvalidResourceQuantities(t *testing.T) {
-    options := &LimitOptions{
-        namespace: "default",
-        name:      "test-limitrange",
-        maxCPU:    "invalid", // Invalid resource quantity
-    }
-
-    err := options.Validate()
-    assert.Error(t, err, "expected error for invalid maxCPU value")
-    assert.Contains(t, err.Error(), "invalid max-cpu value")
-}
-
-func TestValidateInvalidResourceFormat(t *testing.T) {
-    options := &LimitOptions{
-        namespace: "default",
-        name:      "test-limitrange",
-        maxCPU:    "-1", // Negative value
-    }
-
-    err := options.Validate()
-    if assert.Error(t, err, "expected error for negative maxCPU value") {
-        assert.Contains(t, err.Error(), "invalid max-cpu value: must not be negative")
+    for _, tc := range testCases {
+        t.Run(tc.name, func(t *testing.T) {
+            err := tc.options.Validate()
+            if tc.expectError {
+                if assert.Error(t, err) {
+                    assert.Contains(t, err.Error(), tc.errorContains)
+                }
+            } else {
+                assert.NoError(t, err)
+            }
+        })
     }
 }
 
@@ -284,16 +345,28 @@ func TestRunWithOutputOption(t *testing.T) {
     assert.Contains(t, output, "name: test-limitrange")
 }
 
-func TestValidateNegativeMinCPU(t *testing.T) {
+func TestRunWithZeroValueResource(t *testing.T) {
+    fakeClientset := fake.NewSimpleClientset()
+
     options := &LimitOptions{
-        namespace: "default",
-        name:      "test-limitrange",
-        minCPU:    "-100m",
+        name:        "test-limitrange",
+        namespace:   "default",
+        maxCPU:      "0",
+        IOStreams:   genericclioptions.IOStreams{Out: new(bytes.Buffer)},
+        configFlags: genericclioptions.NewConfigFlags(true),
+        clientsetFunc: func(config *rest.Config) (kubernetes.Interface, error) {
+            return fakeClientset, nil
+        },
     }
 
-    err := options.Validate()
-    if assert.Error(t, err, "expected error for negative minCPU value") {
-        assert.Contains(t, err.Error(), "invalid min-cpu value: must not be negative")
+    // Mock ToRESTConfig to return a dummy config
+    options.configFlags.WrapConfigFn = func(c *rest.Config) *rest.Config {
+        return &rest.Config{}
+    }
+
+    err := options.Run()
+    assert.Error(t, err, "expected error during Run with zero value for maxCPU")
+    if err != nil {
+        assert.Contains(t, err.Error(), "invalid max-cpu value: must be greater than zero")
     }
 }
-

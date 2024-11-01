@@ -127,7 +127,6 @@ func (o *LimitOptions) Validate() error {
         return fmt.Errorf("at least one resource limit or request must be specified")
     }
 
-    // Validate resource limit format and check for negative values
     resourceFields := map[string]string{
         "max-cpu":             o.maxCPU,
         "min-cpu":             o.minCPU,
@@ -140,14 +139,12 @@ func (o *LimitOptions) Validate() error {
     for fieldName, value := range resourceFields {
         if value != "" {
             quantity, err := resource.ParseQuantity(value)
-            if quantity.IsZero() {
-                return fmt.Errorf("invalid %s value: must be greater than zero", fieldName)
-            }            
             if err != nil {
                 return fmt.Errorf("invalid %s value: %s", fieldName, err)
             }
-            if quantity.Sign() == -1 {
-                return fmt.Errorf("invalid %s value: must not be negative", fieldName)
+            if quantity.Sign() != 1 {
+                // Sign() returns -1 for negative, 0 for zero, 1 for positive
+                return fmt.Errorf("invalid %s value: must be greater than zero", fieldName)
             }
         }
     }
@@ -156,6 +153,11 @@ func (o *LimitOptions) Validate() error {
 
 // Run executes the creation of the LimitRange or prints the YAML/JSON
 func (o *LimitOptions) Run() error {
+    // Add validation
+    if err := o.Validate(); err != nil {
+        return err
+    }
+
     limitRange := o.createLimitRangeObject()
 
     // Handle client-side dry-run
