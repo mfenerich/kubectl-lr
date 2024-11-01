@@ -36,7 +36,7 @@ jobs:
         run: go mod download
 
       - name: Build binary
-        run: go build -o kubectl-limitrange${{ matrix.ext }} ./cmd/kubectl-lr
+        run: go build -o kubectl-lr${{ matrix.ext }} ./cmd/kubectl-limitrange
 
       - name: Create archive for release
         run: |
