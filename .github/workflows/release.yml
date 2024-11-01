@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  GO_VERSION:  ${{ vars.GO_VERSION }}
+  GO_VERSION: '1.23.x'
 
 permissions:
   contents: write
@@ -27,7 +27,7 @@ jobs:
             checksum_cmd: shasum -a 256
           - os: windows-amd64
             ext: '.exe'
-            checksum_cmd: CertUtil -hashfile
+            checksum_cmd: powershell.exe -Command "Get-FileHash -Algorithm SHA256"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
       - name: Generate SHA256 checksum
         run: |
           if [[ "${{ matrix.os }}" == "windows-amd64" ]]; then
-            ${{ matrix.checksum_cmd }} kubectl-lr-${{ matrix.os }}.zip > kubectl-lr-${{ matrix.os }}.sha256
+            ${{ matrix.checksum_cmd }} kubectl-lr-${{ matrix.os }}.zip | ForEach-Object { $_.Hash } > kubectl-lr-${{ matrix.os }}.sha256
           else
             ${{ matrix.checksum_cmd }} kubectl-lr-${{ matrix.os }}.tar.gz > kubectl-lr-${{ matrix.os }}.sha256
           fi
