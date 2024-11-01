@@ -59,7 +59,7 @@ jobs:
             else
               sha256sum kubectl-lr-${{ matrix.os }}.tar.gz > kubectl-lr-${{ matrix.os }}.sha256
             fi
-          shell: bash
+             shell: bash
         
       - name: List files after checksum generation
         run: ls -l
