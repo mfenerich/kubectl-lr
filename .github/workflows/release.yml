@@ -80,8 +80,8 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
-      - name: Display checksums for debugging
-        run: cat kubectl-lr-*.sha256
+      - name: List files after checksum generation
+        run: ls -l
 
       - name: Create and Upload Release
         uses: softprops/action-gh-release@v2
