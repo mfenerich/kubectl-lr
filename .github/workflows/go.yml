@@ -8,59 +8,77 @@ on:
     branches:
       - main
 
-env:
-  GO_VERSION: ${{ vars.GO_VERSION }}
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go-version: [1.19, 1.20, 1.23]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
+          go-version: ${{ matrix.go-version }}
+          cache: true  # Enables caching of Go modules
 
-      - run: go mod download
+      - name: Install dependencies
+        run: go mod download
 
-      - run: go build ./cmd/kubectl-limitrange
+      - name: Build
+        run: go build ./cmd/kubectl-limitrange
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: kubectl-limitrange
+          name: kubectl-limitrange-${{ matrix.os }}-go${{ matrix.go-version }}
           path: ./kubectl-limitrange
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version: ${{ vars.GO_VERSION }}
+          cache: true  # Enables caching of Go modules
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.61
+          args: --timeout=30m
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go-version: [1.19, 1.20]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
           cache: true
 
-      - run: go mod download
+      - name: Install dependencies
+        run: go mod download
 
-      - uses: golangci/golangci-lint-action@v6
-        with:
-          args: --timeout=30m
-          version: v1.61
-          
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true 
-
-      - run: go mod download
-
-      - run: go test ./... -v
+      - name: Run tests
+        run: go test ./... -v
 
       - name: Check code formatting
         run: go fmt ./...
