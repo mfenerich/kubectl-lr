@@ -40,19 +40,19 @@ go test ./pkg/cmd/... -v
 #### Basic Example
 
 ```bash
-kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
+kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
 ```
 
 #### Client-Side Dry Run
 
 ```bash
-kubectl lr my-limitrange --namespace=my-namespace --max-cpu="2" --dry-run=client -o yaml
+kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="2" --dry-run=client -o yaml
 ```
 
 #### Server-Side Dry Run
 
 ```bash
-kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server -o json
+kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server -o json
 ```
 
 ### Command Flags
@@ -63,25 +63,25 @@ kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server
 - `--default-request-cpu`: Default CPU request for containers.
 - `--max-memory`: Maximum memory limit for containers.
 - `--min-memory`: Minimum memory limit for containers.
-- `-n, --namespace`: Namespace for the `LimitRange` resource (shorthand for `--namespace`).
+- `-n, --namespace`: Namespace for the `limitrange` resource (shorthand for `--namespace`).
 - `--dry-run`: Dry-run mode (`client` or `server`).
 - `-o, --output`: Output format (`yaml` or `json`).
 
 ### Example Commands
 
-- Create a `LimitRange` with CPU and memory limits:
+- Create a `limitrange` with CPU and memory limits:
   ```bash
-  kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
+  kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
   ```
 
 - Client-side dry-run:
   ```bash
-  kubectl lr my-limitrange --namespace=my-namespace --max-cpu="2" --min-cpu=500m --dry-run=client -o yaml
+  kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="2" --min-cpu=500m --dry-run=client -o yaml
   ```
 
 - Server-side dry-run:
   ```bash
-  kubectl lr my-limitrange --namespace=my-namespace --default-cpu=500m --default-request-cpu=200m --dry-run=server -o json
+  kubectl limitrange my-limitrange --namespace=my-namespace --default-cpu=500m --default-request-cpu=200m --dry-run=server -o json
   ```
 
 ## Requirements

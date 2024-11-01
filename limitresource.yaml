@@ -1,11 +1,11 @@
 apiVersion: krew.googlecontainertools.github.com/v1alpha2
 kind: Plugin
 metadata:
-  name: limitresource
+  name: limitrange
 spec:
-  version: v1.0.1
+  version: v1.0.2
   homepage: https://github.com/mfenerich/kubectl-lr
-  shortDescription: "Creates LimitRange resources in Kubernetes"
+  shortDescription: "Creates limitrange resources in Kubernetes"
   description: |
     kubectl-limitrange is a kubectl plugin that allows easy creation of
     LimitRange resources in Kubernetes namespaces with configurable
@@ -15,21 +15,21 @@ spec:
       matchLabels:
         os: darwin
         arch: arm64
-    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.1/kubectl-lr-darwin-amd64.tar.gz
+    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.2/kubectl-limitrange-darwin-amd64.tar.gz
     sha256: 475dab528aceb42f3c4df01ad8c709107c5ee5086d099ae2d36e8b9427955b1c
-    bin: kubectl-lr
+    bin: kubectl-limitrange
   - selector:
       matchLabels:
         os: linux
         arch: amd64
-    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.1/kubectl-lr-linux-amd64.tar.gz
+    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.2/kubectl-limitrange-linux-amd64.tar.gz
     sha256: dd325842baf9a6326269df9239ed09a9d34bf07f90192bc99dafc527e4bf239f
-    bin: kubectl-lr
+    bin: kubectl-limitrange
   - selector:
       matchExpressions:
       matchLabels:
         os: windows
         arch: amd64
-    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.1/kubectl-lr-windows-amd64.zip
+    uri: https://github.com/mfenerich/kubectl-lr/releases/download/v1.0.2/kubectl-limitrange-windows-amd64.zip
     sha256: e1a19e377df54c875252ee86f56b40d0200e9e42d63015453fa20fe53e0a69de
-    bin: kubectl-lr.exe
+    bin: kubectl-limitranges.exe

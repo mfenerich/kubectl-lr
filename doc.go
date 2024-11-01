@@ -1,10 +1,10 @@
 /*
 Package limitrange provides a CLI plugin for Kubernetes that extends the
 functionality of `kubectl` with custom commands for managing and configuring
-LimitRange resources.
+limitrange resources.
 
-The main feature of this plugin is the `kubectl lr` command, which allows users
-to create and validate LimitRange resources with customizable specifications,
+The main feature of this plugin is the `kubectl limitrange` command, which allows users
+to create and validate limitrange resources with customizable specifications,
 including CPU and memory limits, default requests, and dry-run options.
 
 Installation:
@@ -14,7 +14,7 @@ Ensure that `krew` is installed and configured before proceeding.
 Usage:
 To create a LimitRange resource with specific limits, use:
 
-	kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --dry-run=client -o yaml
+	kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --dry-run=client -o yaml
 
 License:
 This project is licensed under the Apache License, Version 2.0. You may not use

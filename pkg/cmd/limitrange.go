@@ -20,10 +20,10 @@ import (
 var (
 	limitExample = `
     # Create a LimitRange with CPU and memory limits in the specified namespace
-    kubectl lr my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --default-cpu=500m --default-request-cpu=500m --max-memory=500Mi --min-memory=100Mi
+    kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --default-cpu=500m --default-request-cpu=500m --max-memory=500Mi --min-memory=100Mi
 
     # Create a LimitRange with only CPU limits
-    kubectl lr my-cpu-limit --namespace=my-namespace --max-cpu="2" --min-cpu=500m --default-cpu=1 --default-request-cpu=500m --dry-run=client -o yaml
+    kubectl limitrange my-cpu-limit --namespace=my-namespace --max-cpu="2" --min-cpu=500m --default-cpu=1 --default-request-cpu=500m --dry-run=client -o yaml
     `
 )
 
@@ -64,7 +64,7 @@ func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
 	o := NewLimitOptions(streams)
 
 	cmd := &cobra.Command{
-		Use:          "lr NAME [flags]",
+		Use:          "limitrange NAME [flags]",
 		Short:        "Create a LimitRange resource",
 		Example:      limitExample,
 		SilenceUsage: true,

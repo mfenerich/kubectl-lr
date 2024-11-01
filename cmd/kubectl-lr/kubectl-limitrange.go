@@ -26,10 +26,10 @@ import (
 	"k8s.io/sample-cli-plugin/pkg/cmd"
 )
 
-// main initializes and executes the kubectl-lr plugin.
+// main initializes and executes the kubectl-limitrange plugin.
 func main() {
 	// Initialize the flag set
-	flags := pflag.NewFlagSet("kubectl-lr", pflag.ExitOnError)
+	flags := pflag.NewFlagSet("kubectl-limitrange", pflag.ExitOnError)
 	pflag.CommandLine = flags
 
 	// Create the root command for the plugin
@@ -41,7 +41,7 @@ func main() {
 
 	// Execute the root command and handle any errors gracefully
 	if err := root.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing kubectl-lr: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error executing kubectl-limitrange: %v\n", err)
 		os.Exit(1)
 	}
 }

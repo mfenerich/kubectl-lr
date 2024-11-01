@@ -48,7 +48,7 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: amd64
-        run: go build -o kubectl-lr${{ matrix.ext }} ./cmd/kubectl-limitrange
+        run: go build -o kubectl-limitrange${{ matrix.ext }} ./cmd/kubectl-lr
 
       # Removed the Copy LICENSE file step
 
@@ -56,33 +56,33 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Compress-Archive -Path "kubectl-lr${{ matrix.ext }}", "LICENSE" -DestinationPath "kubectl-lr-${{ matrix.goos }}-amd64.zip"
+          Compress-Archive -Path "kubectl-limitrange${{ matrix.ext }}", "LICENSE" -DestinationPath "kubectl-limitrange-${{ matrix.goos }}-amd64.zip"
 
       - name: Create archive for release (Unix)
         if: runner.os != 'Windows'
         run: |
-          tar -czvf kubectl-lr-${{ matrix.goos }}-amd64.tar.gz kubectl-lr${{ matrix.ext }} LICENSE
+          tar -czvf kubectl-limitrange-${{ matrix.goos }}-amd64.tar.gz kubectl-limitrange${{ matrix.ext }} LICENSE
 
       - name: Generate checksum (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Get-FileHash -Algorithm SHA256 -Path "kubectl-lr-${{ matrix.goos }}-amd64.zip" |
+          Get-FileHash -Algorithm SHA256 -Path "kubectl-limitrange-${{ matrix.goos }}-amd64.zip" |
           ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), $_.Path } |
-          Out-File -Encoding ascii -FilePath "kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256"
+          Out-File -Encoding ascii -FilePath "kubectl-limitrange-${{ matrix.goos }}-amd64.zip.sha256"
 
       - name: Generate checksum (Unix)
         if: runner.os != 'Windows'
         run: |
-          shasum -a 256 kubectl-lr-${{ matrix.goos }}-amd64.tar.gz | awk '{ print tolower($0) }' > kubectl-lr-${{ matrix.goos }}-amd64.tar.gz.sha256
+          shasum -a 256 kubectl-limitrange-${{ matrix.goos }}-amd64.tar.gz | awk '{ print tolower($0) }' > kubectl-limitrange-${{ matrix.goos }}-amd64.tar.gz.sha256
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kubectl-lr-${{ matrix.goos }}-amd64
+          name: kubectl-limitrange-${{ matrix.goos }}-amd64
           path: |
-            kubectl-lr-${{ matrix.goos }}-amd64.*
-            kubectl-lr-${{ matrix.goos }}-amd64.*.sha256
+            kubectl-limitrange-${{ matrix.goos }}-amd64.*
+            kubectl-limitrange-${{ matrix.goos }}-amd64.*.sha256
 
   create-release:
     runs-on: ubuntu-latest
@@ -114,10 +114,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/*/kubectl-lr-*-amd64.tar.gz
-            artifacts/*/kubectl-lr-*-amd64.zip
-            artifacts/*/kubectl-lr-*-amd64.tar.gz.sha256
-            artifacts/*/kubectl-lr-*-amd64.zip.sha256
+            artifacts/*/kubectl-limitrange-*-amd64.tar.gz
+            artifacts/*/kubectl-limitrange-*-amd64.zip
+            artifacts/*/kubectl-limitrange-*-amd64.tar.gz.sha256
+            artifacts/*/kubectl-limitrange-*-amd64.zip.sha256
           tag_name: "v1.0.1"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body_path: release_body.md
