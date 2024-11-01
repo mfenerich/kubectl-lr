@@ -1,7 +1,7 @@
 apiVersion: krew.googlecontainertools.github.com/v1alpha2
 kind: Plugin
 metadata:
-  name: lr
+  name: kubectl-lr
 spec:
   version: v1.0.0
   homepage: https://github.com/mfenerich/kubectl-lr
