@@ -50,10 +50,6 @@ jobs:
           GOARCH: amd64
         run: go build -o kubectl-lr${{ matrix.ext }} ./cmd/kubectl-limitrange
 
-      - name: Copy LICENSE file
-        run: |
-          cp LICENSE LICENSE
-
       - name: Create archive for release (Windows)
         if: runner.os == 'Windows'
         run: |
@@ -97,6 +93,9 @@ jobs:
         with:
           path: ./artifacts
 
+      - name: DEBUG FILES
+        run: ls -l artifacts
+
       - name: Generate release notes with checksums
         run: |
           echo "## Checksums" > release_body.md
@@ -116,7 +115,7 @@ jobs:
             artifacts/*/kubectl-lr-*-amd64.zip
             artifacts/*/kubectl-lr-*-amd64.tar.gz.sha256
             artifacts/*/kubectl-lr-*-amd64.zip.sha256
-          tag_name: "v1.0.1"
+          tag_name: "v1.0.1"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body_path: release_body.md
           draft: true  # Change to false to automatically publish the release
