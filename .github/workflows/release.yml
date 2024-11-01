@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  GO_VERSION: '1.23.x'
+  GO_VERSION: ${{ vars.GO_VERSION }}
 
 permissions:
   contents: write
@@ -17,14 +17,17 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [linux, macos, windows]
         include:
-          - os: ubuntu-latest
+          - os: linux
             ext: ''
-          - os: macos-latest
+            archive_ext: 'tar.gz'
+          - os: macos
             ext: ''
-          - os: windows-latest
+            archive_ext: 'tar.gz'
+          - os: windows
             ext: '.exe'
+            archive_ext: 'zip'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,19 +46,19 @@ jobs:
 
       - name: Create archive for release
         run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            zip kubectl-lr-${{ matrix.os }}.zip kubectl-lr${{ matrix.ext }}
+          if [[ "${{ matrix.os }}" == "windows" ]]; then
+            zip kubectl-lr-${{ matrix.os }}-amd64.zip kubectl-lr${{ matrix.ext }}
           else
-            tar -czvf kubectl-lr-${{ matrix.os }}.tar.gz kubectl-lr${{ matrix.ext }}
+            tar -czvf kubectl-lr-${{ matrix.os }}-amd64.tar.gz kubectl-lr${{ matrix.ext }}
           fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kubectl-lr-${{ matrix.os }}
+          name: kubectl-lr-${{ matrix.os }}-amd64
           path: |
-            kubectl-lr-${{ matrix.os }}.tar.gz
-            kubectl-lr-${{ matrix.os }}.zip
+            kubectl-lr-${{ matrix.os }}-amd64.tar.gz
+            kubectl-lr-${{ matrix.os }}-amd64.zip
 
   create-release:
     runs-on: ubuntu-latest
@@ -76,9 +79,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/kubectl-lr-ubuntu-latest/kubectl-lr-ubuntu-latest.tar.gz
-            artifacts/kubectl-lr-macos-latest/kubectl-lr-macos-latest.tar.gz
-            artifacts/kubectl-lr-windows-latest/kubectl-lr-windows-latest.zip
+            artifacts/kubectl-lr-linux-amd64/kubectl-lr-linux-amd64.tar.gz
+            artifacts/kubectl-lr-macos-amd64/kubectl-lr-macos-amd64.tar.gz
+            artifacts/kubectl-lr-windows-amd64/kubectl-lr-windows-amd64.zip
           tag_name: "v1.0.0"  # Replace with appropriate tag logic if needed
           name: Release ${{ github.ref_name }}
           body: |
