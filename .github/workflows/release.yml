@@ -95,7 +95,7 @@ jobs:
           path: ./artifacts
 
       - name: DEGUB FILES
-        run: ls -l
+        run: ls -l artifacts
 
       - name: Generate release notes with checksums
         run: |
