@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/github/mfenerich/kubectl-lr/graph/badge.svg?token=A02R6FB3CV)](https://codecov.io/github/mfenerich/kubectl-lr) [![Go CI/CD Pipeline](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml/badge.svg)](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml)
+[![codecov](https://codecov.io/github/mfenerich/kubectl-lr/graph/badge.svg?token=A02R6FB3CV)](https://codecov.io/github/mfenerich/kubectl-lr) [![Go CI/CD Pipeline](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml/badge.svg)](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/mfenerich/kubectl-lr)](https://goreportcard.com/report/github.com/mfenerich/kubectl-lr)
 
 # Kubernetes LimitRange CLI Plugin
 
