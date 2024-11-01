@@ -50,29 +50,32 @@ jobs:
           GOARCH: amd64
         run: go build -o kubectl-lr${{ matrix.ext }} ./cmd/kubectl-limitrange
 
+      - name: Copy LICENSE file
+        run: |
+          cp LICENSE LICENSE
+
       - name: Create archive for release (Windows)
         if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path kubectl-lr${{ matrix.ext }} -DestinationPath kubectl-lr-${{ matrix.goos }}-amd64.zip
+          Compress-Archive -Path "kubectl-lr${{ matrix.ext }},LICENSE" -DestinationPath kubectl-lr-${{ matrix.goos }}-amd64.zip
 
       - name: Create archive for release (Unix)
         if: runner.os != 'Windows'
         run: |
-          tar -czvf kubectl-lr-${{ matrix.goos }}-amd64.tar.gz kubectl-lr${{ matrix.ext }}
+          tar -czvf kubectl-lr-${{ matrix.goos }}-amd64.tar.gz kubectl-lr${{ matrix.ext }} LICENSE
 
       - name: Generate checksum (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-            Get-FileHash -Algorithm SHA256 -Path kubectl-lr-${{ matrix.goos }}-amd64.zip |
-            ForEach-Object { "{0}  {1}" -f $_.Hash, $_.Path } |
-            Out-File -Encoding ascii -FilePath kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256
-        
+          Get-FileHash -Algorithm SHA256 -Path kubectl-lr-${{ matrix.goos }}-amd64.zip |
+          ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), $_.Path } |
+          Out-File -Encoding ascii -FilePath kubectl-lr-${{ matrix.goos }}-amd64.zip.sha256
 
       - name: Generate checksum (Unix)
         if: runner.os != 'Windows'
         run: |
-          shasum -a 256 kubectl-lr-${{ matrix.goos }}-amd64.tar.gz > kubectl-lr-${{ matrix.goos }}-amd64.tar.gz.sha256
+          shasum -a 256 kubectl-lr-${{ matrix.goos }}-amd64.tar.gz | awk '{ print tolower($0) }' > kubectl-lr-${{ matrix.goos }}-amd64.tar.gz.sha256
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -94,9 +97,6 @@ jobs:
         with:
           path: ./artifacts
 
-      - name: DEGUB FILES
-        run: ls -l artifacts
-
       - name: Generate release notes with checksums
         run: |
           echo "## Checksums" > release_body.md
@@ -111,16 +111,15 @@ jobs:
       - name: Create and Upload Release
         uses: softprops/action-gh-release@v2
         with:
-            files: |
-                artifacts/*/kubectl-lr-*-amd64.tar.gz
-                artifacts/*/kubectl-lr-*-amd64.zip
-                artifacts/*/kubectl-lr-*-amd64.tar.gz.sha256
-                artifacts/*/kubectl-lr-*-amd64.zip.sha256
-            tag_name: "v1.0.0"  # Replace with appropriate tag logic if needed
-            name: Release ${{ github.ref_name }}
-            body_path: release_body.md
-            draft: true  # Change to false to automatically publish the release
-            prerelease: false
+          files: |
+            artifacts/*/kubectl-lr-*-amd64.tar.gz
+            artifacts/*/kubectl-lr-*-amd64.zip
+            artifacts/*/kubectl-lr-*-amd64.tar.gz.sha256
+            artifacts/*/kubectl-lr-*-amd64.zip.sha256
+          tag_name: "v1.0.1"
+          name: Release ${{ github.ref_name }}
+          body_path: release_body.md
+          draft: true  # Change to false to automatically publish the release
+          prerelease: false
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
