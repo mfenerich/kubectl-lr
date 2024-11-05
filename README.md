@@ -49,11 +49,23 @@ kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cp
 kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="2" --dry-run=client -o yaml
 ```
 
+![Client-Side Dry Run](assets/dry-run-client.gif)
+
 #### Server-Side Dry Run
 
 ```bash
 kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server -o json
 ```
+
+![Server-Side Dry Run](assets/dry-run-server.gif)
+
+#### No Dry Run Example
+
+```bash
+kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
+```
+
+![No Dry Run](assets/run.gif)
 
 ### Command Flags
 
