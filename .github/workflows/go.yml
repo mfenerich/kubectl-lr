@@ -43,8 +43,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kubectl-limitrange-${{ matrix.os }}
-          path: ./kubectl-limitrange${{ matrix.ext }}
+          name: kubectl-create-limitrange-${{ matrix.os }}
+          path: ./kubectl-create-limitrange${{ matrix.ext }}
 
   lint:
     runs-on: ubuntu-latest
