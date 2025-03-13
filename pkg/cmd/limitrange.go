@@ -20,10 +20,10 @@ import (
 var (
 	limitExample = `
     # Create a LimitRange with CPU and memory limits in the specified namespace
-    kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --default-cpu=500m --default-request-cpu=500m --max-memory=500Mi --min-memory=100Mi
+    kubectl create limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --default-cpu=500m --default-request-cpu=500m --max-memory=500Mi --min-memory=100Mi
 
     # Create a LimitRange with only CPU limits
-    kubectl limitrange my-cpu-limit --namespace=my-namespace --max-cpu="2" --min-cpu=500m --default-cpu=1 --default-request-cpu=500m --dry-run=client -o yaml
+    kubectl create limitrange my-cpu-limit --namespace=my-namespace --max-cpu="2" --min-cpu=500m --default-cpu=1 --default-request-cpu=500m --dry-run=client -o yaml
     `
 )
 
@@ -59,8 +59,8 @@ func NewLimitOptions(streams genericclioptions.IOStreams) *LimitOptions {
 	}
 }
 
-// NewCmdLimit creates a cobra command wrapping LimitOptions
-func NewCmdLimit(streams genericiooptions.IOStreams) *cobra.Command {
+// NewCmdCreateLimitRange creates a cobra command wrapping LimitOptions
+func NewCmdCreateLimitRange(streams genericiooptions.IOStreams) *cobra.Command {
 	o := NewLimitOptions(streams)
 
 	cmd := &cobra.Command{
@@ -203,7 +203,7 @@ func (o *LimitOptions) Run() error {
 	}
 
 	// Print success message
-	fmt.Fprintf(o.IOStreams.Out, "LimitRange %q created successfully in namespace %q\n", limitRange.Name, o.namespace)
+	fmt.Fprintf(o.IOStreams.Out, "limitrange.core %q created\n", limitRange.Name)
 	return nil
 }
 
