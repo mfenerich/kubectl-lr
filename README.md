@@ -1,12 +1,12 @@
-[![codecov](https://codecov.io/github/mfenerich/kubectl-lr/graph/badge.svg?token=A02R6FB3CV)](https://codecov.io/github/mfenerich/kubectl-lr) [![Go CI/CD Pipeline](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml/badge.svg)](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/mfenerich/kubectl-lr)](https://goreportcard.com/report/github.com/mfenerich/kubectl-lr)
+# Kubernetes Create LimitRange CLI Plugin
 
-# Kubernetes LimitRange CLI Plugin
+[![codecov](https://codecov.io/github/mfenerich/kubectl-lr/graph/badge.svg?token=A02R6FB3CV)](https://codecov.io/github/mfenerich/kubectl-lr) [![Go CI/CD Pipeline](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml/badge.svg)](https://github.com/mfenerich/kubectl-lr/actions/workflows/go.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/mfenerich/kubectl-lr)](https://goreportcard.com/report/github.com/mfenerich/kubectl-lr)
 
 A `kubectl` plugin for creating `LimitRange` resources with specified CPU and memory limits in Kubernetes namespaces.
 
 ## Overview
 
-This plugin provides a command-line interface for easily creating `LimitRange` resources in your Kubernetes cluster. It supports both client-side and server-side dry runs and outputs in YAML or JSON formats for previewing the resource before creation.
+This plugin provides a command-line interface for easily creating `LimitRange` resources in your Kubernetes cluster. It extends the `kubectl create` command to support creating LimitRange resources directly. It supports both client-side and server-side dry runs and outputs in YAML or JSON formats for previewing the resource before creation.
 
 ## Features
 
@@ -20,13 +20,13 @@ This plugin provides a command-line interface for easily creating `LimitRange` r
 Ensure you have Go installed and `kubectl` configured on your system. Clone this repository and run:
 
 ```bash
-go build cmd/kubectl-lr/kubectl-limitrange.go
+go build cmd/kubectl-create-lr/kubectl-create-limitrange.go
 ```
 
 Move the binary to a directory in your `PATH`:
 
 ```bash
-mv kubectl-limitrange /usr/local/bin/
+mv kubectl-create-limitrange /usr/local/bin/
 ```
 
 ## Run tests
@@ -40,13 +40,13 @@ go test ./pkg/cmd/... -v
 #### Basic Example
 
 ```bash
-kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
+kubectl create limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
 ```
 
 #### Client-Side Dry Run
 
 ```bash
-kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="2" --dry-run=client -o yaml
+kubectl create limitrange my-limitrange --namespace=my-namespace --max-cpu="2" --dry-run=client -o yaml
 ```
 
 ![Client-Side Dry Run](assets/dry-run-client.gif)
@@ -54,7 +54,7 @@ kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="2" --dry-ru
 #### Server-Side Dry Run
 
 ```bash
-kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server -o json
+kubectl create limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --dry-run=server -o json
 ```
 
 ![Server-Side Dry Run](assets/dry-run-server.gif)
@@ -62,7 +62,7 @@ kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --dry-ru
 #### No Dry Run Example
 
 ```bash
-kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
+kubectl create limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
 ```
 
 ![No Dry Run](assets/run.gif)
@@ -83,22 +83,22 @@ kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cp
 
 - Create a `limitrange` with CPU and memory limits:
   ```bash
-  kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
+  kubectl create limitrange my-limitrange --namespace=my-namespace --max-cpu="1" --min-cpu=100m --max-memory=500Mi --min-memory=100Mi
   ```
 
 - Client-side dry-run:
   ```bash
-  kubectl limitrange my-limitrange --namespace=my-namespace --max-cpu="2" --min-cpu=500m --dry-run=client -o yaml
+  kubectl create limitrange my-limitrange --namespace=my-namespace --max-cpu="2" --min-cpu=500m --dry-run=client -o yaml
   ```
 
 - Server-side dry-run:
   ```bash
-  kubectl limitrange my-limitrange --namespace=my-namespace --default-cpu=500m --default-request-cpu=200m --dry-run=server -o json
+  kubectl create limitrange my-limitrange --namespace=my-namespace --default-cpu=500m --default-request-cpu=200m --dry-run=server -o json
   ```
 
 ## Requirements
 
-- Go 1.23 or later.
+- Go 1.24 or later.
 - `kubectl` configured on your system.
 
 ## Contributing
