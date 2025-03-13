@@ -17,18 +17,23 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
+          # Linux entries
           - os: ubuntu-latest
             goos: linux
+            arch: amd64
             ext: ''
             archive_ext: 'tar.gz'
+          # macOS entry
           - os: macos-latest
             goos: darwin
+            arch: arm64
             ext: ''
             archive_ext: 'tar.gz'
+          # Windows entries
           - os: windows-latest
             goos: windows
+            arch: amd64
             ext: '.exe'
             archive_ext: 'zip'
     steps:
@@ -47,42 +52,40 @@ jobs:
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
-          GOARCH: amd64
-        run: go build -o kubectl-limitrange${{ matrix.ext }} ./cmd/kubectl-lr
-
-      # Removed the Copy LICENSE file step
+          GOARCH: ${{ matrix.arch }}
+        run: go build -o kubectl-limitrange${{ matrix.ext }} ./cmd/kubectl-create-lr
 
       - name: Create archive for release (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Compress-Archive -Path "kubectl-limitrange${{ matrix.ext }}", "LICENSE" -DestinationPath "kubectl-limitrange-${{ matrix.goos }}-amd64.zip"
+          Compress-Archive -Path "kubectl-limitrange${{ matrix.ext }}", "LICENSE" -DestinationPath "kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}.zip"
 
       - name: Create archive for release (Unix)
         if: runner.os != 'Windows'
         run: |
-          tar -czvf kubectl-limitrange-${{ matrix.goos }}-amd64.tar.gz kubectl-limitrange${{ matrix.ext }} LICENSE
+          tar -czvf kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}.tar.gz kubectl-limitrange${{ matrix.ext }} LICENSE
 
       - name: Generate checksum (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Get-FileHash -Algorithm SHA256 -Path "kubectl-limitrange-${{ matrix.goos }}-amd64.zip" |
+          Get-FileHash -Algorithm SHA256 -Path "kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}.zip" |
           ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), $_.Path } |
-          Out-File -Encoding ascii -FilePath "kubectl-limitrange-${{ matrix.goos }}-amd64.zip.sha256"
+          Out-File -Encoding ascii -FilePath "kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}.zip.sha256"
 
       - name: Generate checksum (Unix)
         if: runner.os != 'Windows'
         run: |
-          shasum -a 256 kubectl-limitrange-${{ matrix.goos }}-amd64.tar.gz | awk '{ print tolower($0) }' > kubectl-limitrange-${{ matrix.goos }}-amd64.tar.gz.sha256
+          shasum -a 256 kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}.tar.gz | awk '{ print tolower($0) }' > kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}.tar.gz.sha256
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kubectl-limitrange-${{ matrix.goos }}-amd64
+          name: kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}
           path: |
-            kubectl-limitrange-${{ matrix.goos }}-amd64.*
-            kubectl-limitrange-${{ matrix.goos }}-amd64.*.sha256
+            kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}.*
+            kubectl-limitrange-${{ matrix.goos }}-${{ matrix.arch }}.*.sha256
 
   create-release:
     runs-on: ubuntu-latest
@@ -114,14 +117,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/*/kubectl-limitrange-*-amd64.tar.gz
-            artifacts/*/kubectl-limitrange-*-amd64.zip
-            artifacts/*/kubectl-limitrange-*-amd64.tar.gz.sha256
-            artifacts/*/kubectl-limitrange-*-amd64.zip.sha256
+            artifacts/*/kubectl-limitrange-*.tar.gz
+            artifacts/*/kubectl-limitrange-*.zip
+            artifacts/*/kubectl-limitrange-*.tar.gz.sha256
+            artifacts/*/kubectl-limitrange-*.zip.sha256
           tag_name: "v1.0.3"
           name: Release ${{ github.ref_name }}
           body_path: release_body.md
-          draft: true  # Change to false to automatically publish the release
+          draft: true
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
