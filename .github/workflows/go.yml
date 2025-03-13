@@ -38,7 +38,7 @@ jobs:
         run: go mod download
 
       - name: Build
-        run: go build -o kubectl-create-limitrange.go${{ matrix.ext }} ./cmd/kubectl-create-lr
+        run: go build -o kubectl-create-limitrange${{ matrix.ext }} ./cmd/kubectl-create-lr
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
