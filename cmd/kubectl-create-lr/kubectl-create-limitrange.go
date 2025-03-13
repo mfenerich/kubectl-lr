@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package main is the entry point for the kubectl-lr plugin.
+// Package main is the entry point for the kubectl-create-limitrange plugin.
 package main
 
 import (
@@ -26,14 +26,14 @@ import (
 	"k8s.io/sample-cli-plugin/pkg/cmd"
 )
 
-// main initializes and executes the kubectl-limitrange plugin.
+// main initializes and executes the kubectl-create-limitrange plugin.
 func main() {
 	// Initialize the flag set
-	flags := pflag.NewFlagSet("kubectl-limitrange", pflag.ExitOnError)
+	flags := pflag.NewFlagSet("kubectl-create-limitrange", pflag.ExitOnError)
 	pflag.CommandLine = flags
 
 	// Create the root command for the plugin
-	root := cmd.NewCmdLimit(genericiooptions.IOStreams{
+	root := cmd.NewCmdCreateLimitRange(genericiooptions.IOStreams{
 		In:     os.Stdin,
 		Out:    os.Stdout,
 		ErrOut: os.Stderr,
@@ -41,7 +41,7 @@ func main() {
 
 	// Execute the root command and handle any errors gracefully
 	if err := root.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing kubectl-limitrange: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error executing kubectl-create-limitrange: %v\n", err)
 		os.Exit(1)
 	}
 }

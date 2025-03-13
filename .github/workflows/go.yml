@@ -38,13 +38,13 @@ jobs:
         run: go mod download
 
       - name: Build
-        run: go build -o kubectl-limitrange${{ matrix.ext }} ./cmd/kubectl-lr
+        run: go build -o kubectl-create-limitrange${{ matrix.ext }} ./cmd/kubectl-create-lr
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kubectl-limitrange-${{ matrix.os }}
-          path: ./kubectl-limitrange${{ matrix.ext }}
+          name: kubectl-create-limitrange-${{ matrix.os }}
+          path: ./kubectl-create-limitrange${{ matrix.ext }}
 
   lint:
     runs-on: ubuntu-latest
@@ -67,7 +67,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.61
+          version: v1.64
           args: --timeout=30m
 
   test:
